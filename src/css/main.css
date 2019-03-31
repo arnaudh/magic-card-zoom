@@ -1,0 +1,30 @@
+
+.mcz-popup {
+	position: absolute;
+	/*background: white;*/
+	top: 20%;
+	left: 10px;
+	width: 312px;
+	max-width: 312px;
+	height: 445px;
+	z-index: 19999999998;
+	visibility: hidden;
+}
+
+.mcz-popup img {
+	border-radius: 16px;
+	height:100%;
+	width: 100%;
+	box-shadow: 0 0 6px #000;
+}
+
+.loading-popup {
+	position: absolute;
+	top: 20%;
+	left: 10px;
+	width: 15px;
+	max-width: 15px;
+	height: 15px;
+	z-index: 19999999999;
+	visibility: hidden;
+}

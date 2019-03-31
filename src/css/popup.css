@@ -1,0 +1,17 @@
+
+body {
+    margin: 7px 10px;
+}
+
+label {
+    margin: 3px 0.5ex; /* same as the <input type="radio"> in chrome popup */
+}
+
+#main-div {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+button {
+    float: right;
+}

@@ -1,0 +1,8 @@
+*.zip
+node_modules/
+build/
+benchmarks/
+assets/
+*.bak
+*.log
+flamegraph.html

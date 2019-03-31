@@ -1,0 +1,38 @@
+{
+  "descriptorIndexName": "orb-maxkeypoints200-cardheight70",
+  "identifyServiceName": "orb-maxkeypoints10000-cardheight70_bruteforce-hamming_min3-max100-ratio0.82min3-affine1",
+  "availableStandards": [
+    "standard-ths",
+    "standard-bng",
+    "standard-jou",
+    "standard-m15",
+    "standard-ktk",
+    "standard-frf",
+    "standard-dtk",
+    "standard-ori",
+    "standard-bfz",
+    "standard-ogw",
+    "standard-soi",
+    "standard-emn",
+    "standard-kld",
+    "standard-aer",
+    "standard-akh",
+    "standard-hou",
+    "standard-xln",
+    "standard-rix",
+    "standard-dom",
+    "standard-m19",
+    "standard-grn",
+    "standard-rna"
+  ],
+  "includeTokens": true,
+  "youtubeChannels": {
+    "UC8ZGymAvfP97qJabgqUkz4A": {
+      "card_heights": [
+        0.11,
+        0.09,
+        0.13
+      ]
+    }
+  }
+}
