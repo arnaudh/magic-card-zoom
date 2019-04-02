@@ -4,7 +4,7 @@ MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards
 
 ![](src/img/capture1.gif)
 
-The extension can be installed directly from the [Chrome Web Store](somelink).
+The extension can be installed directly from the [Chrome Web Store](https://chrome.google.com/webstore/detail/magic-card-zoom/cphkchmjhpgjajfogfkolbgageciokda).
 
 <!--- Detailed Description for the Web Store
 
