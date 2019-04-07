@@ -3,6 +3,8 @@ console.log('main.js');
 import '../../css/main.css'
 import '../../img/eye01_smaller.gif'
 
+const config = require('../../../config.json');
+
 let channelUrlRegex = /.*youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
 
 var theVideo;
@@ -72,7 +74,10 @@ var readyStateCheckInterval = setInterval(function() {
 
     document.addEventListener('mousemove', mymousemove, false);
 
-    addKeyListener();
+    if (config.devMode) {
+      console.log('DEV MODE ENABLED, adding key listener');
+      addKeyListener();
+    }
 
     checkMouseLoopInterval = setInterval(checkMouseLoop, MOUSE_CHECK_LOOP_INTERVAL);
 
