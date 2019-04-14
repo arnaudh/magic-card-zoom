@@ -24,10 +24,9 @@ To stop running the extension, click on the extension icon, then click on "Turn 
 
 I am currently working on those limitations. Please check the extension page again for updates!
 
-=== Feedback / issues ===
+=== Feedback / contribute ===
 Please submit any feedback, issues, or feature requests you have here: https://github.com/arnaudh/magic-card-zoom/issues
-Also, this extension is Open Source, and you are more than welcome to contribute!
-GitHub link: https://github.com/arnaudh/magic-card-zoom
+Also, this extension is Open Source and you are more than welcome to contribute! https://github.com/arnaudh/magic-card-zoom
 
 === Disclaimer ===
 MagicCardZoom is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.

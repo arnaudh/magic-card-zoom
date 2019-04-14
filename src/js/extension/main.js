@@ -1,7 +1,7 @@
 console.log('main.js');
 
 import '../../css/main.css'
-import '../../img/eye01_smaller.gif'
+import '../../img/loading.gif'
 
 const config = require('../../../config.json');
 
@@ -58,7 +58,7 @@ var readyStateCheckInterval = setInterval(function() {
     popup.appendChild(popupImage);
     
     loadingPopupImage = document.createElement('img');
-    loadingPopupImage.src = chrome.extension.getURL("eye01_smaller.gif");
+    loadingPopupImage.src = chrome.extension.getURL("loading.gif");
     loadingPopup = document.createElement('div');
     loadingPopup.className = "loading-popup";
     loadingPopup.appendChild(loadingPopupImage);

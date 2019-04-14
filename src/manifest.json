@@ -2,7 +2,7 @@
   "name": "Magic Card Zoom",
   "version": "1.0.0",
   "manifest_version": 2,
-  "description": "Identify Magic: The Gathering™ cards in YouTube videos (UNOFFICIAL)",
+  "description": "Identify Magic: The Gathering™ cards in YouTube videos",
   "icons": {
     "128": "icon128.png"
   },
