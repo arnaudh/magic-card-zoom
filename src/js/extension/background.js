@@ -154,7 +154,7 @@ chrome.runtime.onMessage.addListener(
         let token = new Date().toISOString().replace(/:./g, '');
         let videoId = message.data.videoId;
         let cardId = message.data.correctlyIdentified ? lastCardId : '';
-        saveAs(lastBlob, `${token}/request_input.png`);
+        saveAs(lastBlob, `${token}/input.png`);
         let yamlBlob = new Blob([`card: ${cardId}\nvideo: ${videoId}\nvideoheight: ${lastVideoHeight}\ncardheight: ${lastCardHeight}\n`], {type: "text/plain;charset=utf-8"});
         saveAs(yamlBlob, `${token}_info.yml`);
         break;

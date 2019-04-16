@@ -15,8 +15,8 @@ fs.readdirSync(downloadDir)
         let datasetSubdir = `${datasetDir}/${datasetInsertIndex.toString().padStart(5, '0')}`;
         fs.mkdirsSync(datasetSubdir);
         fs.rename(`${downloadDir}/${prefix}_info.yml`, `${datasetSubdir}/info.yml`);
-        fs.rename(`${downloadDir}/${prefix}_request_input.png`, `${datasetSubdir}/request_input.png`);
-        console.log(`Moved ${downloadDir}/${prefix}_{info.yml,request_input.png} to ${datasetSubdir}/`);
+        fs.rename(`${downloadDir}/${prefix}_input.png`, `${datasetSubdir}/input.png`);
+        console.log(`Moved ${downloadDir}/${prefix}_{info.yml,input.png} to ${datasetSubdir}/`);
         datasetInsertIndex++;
     }
   });

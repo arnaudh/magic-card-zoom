@@ -136,12 +136,12 @@ function doTest(cvwrapper) {
             let debugOutputDir = `${benchmarkDir}/images/${test_item_name}/`;
             let cvDebug = program.cvdebug ? new CvDebug(debugOutputDir, true) : null;
             
-            var originalImg = new CvDebug().imread(`${dir}/request_input.png`);
+            var originalImg = new CvDebug().imread(`${dir}/input.png`);
             var originalImageData = new CvDebug().toImageData(originalImg);
 
             if (cvDebug) {
                 // save training image and info in benchmark dir
-                cvDebug.imwrite('request_input.png', originalImg);
+                cvDebug.imwrite('input.png', originalImg);
                 copyFile(`${dir}/info.yml`, `${debugOutputDir}/info.yml`);
 
                 cvDebug.true_card_id = true_card_id;
