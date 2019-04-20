@@ -55,4 +55,29 @@ describe('opencvjs_wrapper', () => {
             done();
         })
     })
+
+    describe('#findRectangles', () => {
+        it('should findRectangles', (done) => {
+            let grayImg = [
+                [0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+                [0,  0,  0,  0,100,100,100,  0,  0,  0],
+                [0,  0,  0,  0,100,100,100,  0,  0,  0],
+                [0,  0,  0,  0,100,100,  0,  0,  0,  0],
+                [0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+                [0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+                [0,  0,  0,  0,100,100,100,  0,  0,  0],
+                [0,  0,  0,  0,100,100,100,  0,  0,  0],
+                [0,  0,  0,  0,100,100,100,  0,  0,  0],
+                [0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
+            ];
+            let minContourLength = 5;
+            let minArea = 0;
+            let maxArea = 100;
+            let rectangles = cv.findRectangles(grayImg, minContourLength, minArea, maxArea);
+            assert.deepEqual(rectangles, [
+                [[4, 6], [4, 8], [6, 8], [6, 6]]
+            ]);
+            done();
+        })
+    })
 })

@@ -25,7 +25,86 @@ class OpenCVJsWrapper {
             transformComponents: transformMatrixToComponents(transformArr)
         };
     }
+
+    // Adapted from https://github.com/opencv/opencv/blob/master/samples/python/squares.py
+    findRectangles(grayMatInput, minContourLength = 150, minArea = 1000, maxArea = 50000) {
+        let grayMat = arrayToCvMat(grayMatInput, opencvjs.CV_8U);
+        let grayMat2 = new opencvjs.Mat(grayMat.size(), opencvjs.CV_8U);
+
+        let rectangles = [];
+
+        for (let threshold = 0; threshold < 255; threshold += 26) {
+            if (threshold == 0) {
+                // TODO for threshold 0, do Canny
+                continue;
+            }
+            opencvjs.threshold(grayMat, grayMat2, threshold, 255, opencvjs.THRESH_BINARY);
+
+            let contours = new opencvjs.MatVector();
+            opencvjs.findContours(grayMat2, contours, new opencvjs.Mat(), opencvjs.RETR_LIST, opencvjs.CHAIN_APPROX_SIMPLE, new opencvjs.Point())
+            
+            for (var c = 0; c < contours.size(); c++) {
+                let contour = contours.get(c);
+                let contourLength = opencvjs.arcLength(contours.get(c), true);
+                if (contourLength < minContourLength) {
+                    continue;
+                }
+                let approximatedContour = new opencvjs.Mat();
+                opencvjs.approxPolyDP(contour, approximatedContour, 0.02*contourLength, true);
+                let numCorners = approximatedContour.size().height;
+                
+                if (numCorners === 4) {
+                    let contourArea = opencvjs.contourArea(approximatedContour);
+
+                    if (contourArea > minArea && contourArea < maxArea) {
+
+                        if (opencvjs.isContourConvex(approximatedContour)) {
+                            let rectangle = cvMatToArray(approximatedContour);
+                            let anglesCos = [0, 1, 2, 3]
+                                .map(i => angle_cos(rectangle[i], rectangle[(i+1) % 4], rectangle[(i+2) % 4]))
+                            let maxCos = Math.max.apply(Math, anglesCos);
+
+                            if (maxCos < 0.1) { // all corners are right angles
+                                if (!isAlreadyAdded(rectangles, rectangle)) {
+                                    rectangles.push(rectangle);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return rectangles;
+    }
 }
+
+function isAlreadyAdded(rectangles, rectangle) {
+    return rectangles.some(r => areRectanglesEqual(r, rectangle));
+}
+
+function areRectanglesEqual(rect1, rect2) {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 2; j++) {
+            if (rect1[i][j] !== rect2[i][j]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+function angle_cos(p0, p1, p2) {
+    let v1 = [p0[0]-p1[0], p0[1]-p1[1]];
+    let v2 = [p2[0]-p1[0], p2[1]-p1[1]];
+    let result = Math.abs( dot(v1, v2) / Math.sqrt( dot(v1, v1) * dot(v2, v2) ) );
+    return result;
+}
+
+function dot(v1, v2) {
+    return v1[0]*v2[0] + v1[1]*v2[1];
+}
+
 
 // https://math.stackexchange.com/questions/13150/extracting-rotation-scale-values-from-2d-transformation-matrix/13165#13165
 function transformMatrixToComponents(transformArr) {
@@ -80,6 +159,9 @@ function arrayToCvMat(arr, type=opencvjs.CV_64F) {
 function cvMatToArray(mat) {
     let size = mat.size();
     let arr = [];
+    if (mat.type() === opencvjs.CV_32SC2) {
+        size.width = 2; // because we have 2 channels
+    }
     for (var i = 0; i < size.height; i++) {
         let row = [];
         for (var j = 0; j < size.width; j++) {
@@ -90,9 +172,10 @@ function cvMatToArray(mat) {
                 case opencvjs.CV_16U:  value = mat.ushortAt(i,j); break;
                 case opencvjs.CV_16S:  value = mat.shortAt(i,j);  break;
                 case opencvjs.CV_32S:  value = mat.intAt(i,j);    break;
+                case opencvjs.CV_32SC2:value = mat.intAt(i,j);    break;
                 case opencvjs.CV_32F:  value = mat.floatAt(i,j);  break;
                 case opencvjs.CV_64F:  value = mat.doubleAt(i,j); break;
-                default: throw `Unknown mat data type ${type}`;
+                default: throw `Unknown mat data type ${mat.type()}`;
             }
             row.push(value);
         }
