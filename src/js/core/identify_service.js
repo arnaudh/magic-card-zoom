@@ -1,5 +1,6 @@
 console.log('identify_service.js');
 
+const ContourFinder = require('./contour_finder.js');
 const descriptors = require('./descriptors.js');
 const searchers = require('./searchers.js');
 const Matcher = require('./matcher.js');
@@ -12,9 +13,10 @@ function logDescription(description) {
     }
 }
 
+
 class IdentifyService {
 
-    constructor(name, jsonIndex, cvwrapper) {
+    constructor(name, jsonIndex, cvwrapper, withHistory) {
         let [descriptorName, searcherName, matcherName] = name.split('_');
         this.name = name;
         this.featuresDescriptor = descriptors.fromName(descriptorName);
@@ -22,15 +24,34 @@ class IdentifyService {
             throw 'this.featuresDescriptor.cardHeight is not defined'
         }
         this.featuresMatcher = new Matcher(matcherName, jsonIndex, this.featuresDescriptor.cardHeight, searchers.fromName(searcherName), cvwrapper);
-        this.previousMatches = []; //TODO limit in time
+        this.withHistory = withHistory;
+        if (this.withHistory) {
+            this.previousMatches = []; //TODO limit in time
+        }
+        this.contourFinder = new ContourFinder(cvwrapper);
         console.log('IdentifyService', this.name);
     }
 
-    async identify(imageData, potentialCardHeights, cv_debug = null) {
+    // TODO pass whole screen with cursor position (so we can detect card contours over whole screen)
+    // TODO deal with cardHeight (video ratio) instead of cardHeight (pixels)
+    async identify(imageData, defaultPotentialCardHeights, cv_debug = null) {
+        let previousMatchCardHeights = [];
+        if (this.previousMatches) {
+            this.previousMatches.map(matches => matches[0].cardHeight);
+        }
+        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(imageData);
+        let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
+        potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
+        console.log('previousMatchCardHeights', previousMatchCardHeights);
+        console.log('estimatedPotentialCardHeights', estimatedPotentialCardHeights);
+        console.log('defaultPotentialCardHeights', defaultPotentialCardHeights);
+        console.log('=> potentialCardHeights', potentialCardHeights);
         const timer = new Timer();
         let results = null;
-        results = this.checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug);
-        if (results.matches.length == 0) {
+        if (this.withHistory) {
+            results = this.checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug);
+        }
+        if (!results || results.matches.length == 0) {
             for (let i = 0; i < potentialCardHeights.length; i++) {
                 let cardHeight = potentialCardHeights[i];
                 let scale = this.featuresDescriptor.cardHeight / cardHeight;
@@ -40,8 +61,11 @@ class IdentifyService {
 
                 results = this.identifySingleScale(imageDataResized, cv_debug);
                 if (results.matches.length > 0) {
-                    results.matches[0].cardHeight = cardHeight;
-                    this.previousMatches.push(results.matches);
+                    console.log('results.matches[0].contour', results.matches[0].contour);
+                    results.matches[0].cardHeight = contourSideLength(results.matches[0].contour);
+                    if (this.withHistory) {
+                        this.previousMatches.push(results.matches);
+                    }
                     break;
                 }
             }
@@ -136,6 +160,26 @@ class IdentifyService {
             'time': timer.get()
         };
     }
+}
+
+function contourSideLength(c) {
+    let l0 = distance(c[0], c[1]);
+    let l1 = distance(c[1], c[2]);
+    let l2 = distance(c[2], c[3]);
+    let l3 = distance(c[3], c[0]);
+    console.log('l0', l0);
+    console.log('l1', l1);
+    console.log('l2', l2);
+    console.log('l3', l3);
+    let sidesSorted = [l0, l1, l2, l3].sort();
+    console.log('sidesSorted');
+    let averageLength = (sidesSorted[2]+sidesSorted[3])/2;
+    console.log('averageLength', averageLength);
+    return averageLength;
+}
+
+function distance(a, b) {
+    return Math.hypot(...a.map((e,i)=>e-b[i]));
 }
 
 // simple timer class

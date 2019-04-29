@@ -25,6 +25,7 @@
     "canvas": "^2.0.1",
     "cheerio": "^1.0.0-rc.2",
     "commander": "^2.19.0",
+    "density-clustering": "^1.3.0",
     "fetch-ponyfill": "^6.0.2",
     "file-saver": "^2.0.0",
     "flamebearer": "^1.1.3",

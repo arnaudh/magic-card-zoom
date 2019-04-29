@@ -1,4 +1,4 @@
-
+const ContourFinder = require('../../src/js/core/contour_finder.js');
 const IdentifyService = require('../../src/js/core/identify_service.js');
 const CvDebug = require('../../src/js/util/cv_debug.js');
 const mtg_sets = require('../../src/js/mtg_sets.js');
@@ -7,6 +7,7 @@ const rimraf = require('rimraf');
 const path = require('path');
 const readYaml = require('read-yaml');
 const program = require('commander');
+const clustering = require('density-clustering');
 
 program
     .option('-d, --descriptor [name]', 'Which index descriptor to use [eg orb-maxkeypoints200]')
@@ -109,6 +110,10 @@ for (var mtg_set of training_mtg_sets) {
     indexes[mtg_set] = require(index_file);
 }
 
+function average(arr) {
+    return arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
+}
+
 function doTest(cvwrapper) {
     console.log('doTest');
     let identify_services = {}
@@ -117,8 +122,9 @@ function doTest(cvwrapper) {
         for (var mtg_set of mtg_sets.expandSets(mtg_format)) {
             index = {...index, ...indexes[mtg_set]};
         }
-        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper);
+        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, true);
     }
+    let contourFinder = new ContourFinder(cvwrapper);
 
     let benchmarkDir = `benchmarks/${identify_service_name}__test${trainingItems.length}/`;
     rimraf.sync(benchmarkDir);
@@ -130,14 +136,25 @@ function doTest(cvwrapper) {
             let dir = item.trainingDir
             let true_card_id = item.true_card_id;
             let video_id = item.video_id;
-            let cardheight = item.cardheight;
+            let potentialCardHeights = [item.cardheight];
             let mtg_format = item.mtg_format;
             let test_item_name = path.basename(dir);
             let debugOutputDir = `${benchmarkDir}/images/${test_item_name}/`;
             let cvDebug = program.cvdebug ? new CvDebug(debugOutputDir, true) : null;
+            console.log(`*** ${item.trainingDir} [${item.true_card_id}] (${item.tags}) ***`);
             
             var originalImg = new CvDebug().imread(`${dir}/input.png`);
             var originalImageData = new CvDebug().toImageData(originalImg);
+
+            let estimatedPotentialCardHeights = contourFinder.getPotentialCardHeights(originalImageData);
+            if (estimatedPotentialCardHeights.length > 0) {
+                console.log(`Overriding cardheight ${potentialCardHeights} with ${estimatedPotentialCardHeights}`);
+                potentialCardHeights = estimatedPotentialCardHeights;
+            } else {
+                if (item.true_card_id !== null) {
+                    console.log('NO RECTANGLES FOUND');
+                }
+            }
 
             if (cvDebug) {
                 // save training image and info in benchmark dir
@@ -147,9 +164,8 @@ function doTest(cvwrapper) {
                 cvDebug.true_card_id = true_card_id;
             }
 
-            console.log(`*** true_card_id = ${item.true_card_id} (${item.trainingDir}) ***`);
             return identify_services[mtg_format]
-                .identify(originalImageData, [cardheight], cvDebug)
+                .identify(originalImageData, potentialCardHeights, cvDebug)
                 .then(result => {
                     let {matches: matches, time: time} = result;
                     let card_identified;

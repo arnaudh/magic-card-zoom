@@ -27,9 +27,15 @@ class OpenCVJsWrapper {
     }
 
     // Adapted from https://github.com/opencv/opencv/blob/master/samples/python/squares.py
-    findRectangles(grayMatInput, minContourLength = 150, minArea = 1000, maxArea = 50000) {
-        let grayMat = arrayToCvMat(grayMatInput, opencvjs.CV_8U);
-        let grayMat2 = new opencvjs.Mat(grayMat.size(), opencvjs.CV_8U);
+    findRectangles(imageData, minContourLength = 150, minArea = 1000, maxArea = 50000) {
+        // let grayMat = arrayToCvMat(grayMatInput, opencvjs.CV_8U);
+
+        let cvMat = opencvjs.matFromImageData(imageData);
+        let grayMat = new opencvjs.Mat();
+        opencvjs.cvtColor(cvMat, grayMat, opencvjs.COLOR_RGBA2GRAY, 0);
+        // console.log('grayMat', grayMat.channels());
+
+        let thresholdedMat = new opencvjs.Mat(grayMat.size(), opencvjs.CV_8U);
 
         let rectangles = [];
 
@@ -38,10 +44,11 @@ class OpenCVJsWrapper {
                 // TODO for threshold 0, do Canny
                 continue;
             }
-            opencvjs.threshold(grayMat, grayMat2, threshold, 255, opencvjs.THRESH_BINARY);
+            opencvjs.threshold(grayMat, thresholdedMat, threshold, 255, opencvjs.THRESH_BINARY);
 
             let contours = new opencvjs.MatVector();
-            opencvjs.findContours(grayMat2, contours, new opencvjs.Mat(), opencvjs.RETR_LIST, opencvjs.CHAIN_APPROX_SIMPLE, new opencvjs.Point())
+            let otherThing = new opencvjs.Mat();
+            opencvjs.findContours(thresholdedMat, contours, otherThing, opencvjs.RETR_LIST, opencvjs.CHAIN_APPROX_SIMPLE, new opencvjs.Point());
             
             for (var c = 0; c < contours.size(); c++) {
                 let contour = contours.get(c);
@@ -72,8 +79,14 @@ class OpenCVJsWrapper {
                         }
                     }
                 }
+                // approximatedContour.delete();
             }
+            // contours.delete();
+            // otherThing.delete();
         }
+        // cvMat.delete();
+        // grayMat.delete();
+        // thresholdedMat.delete();
         return rectangles;
     }
 }
@@ -134,6 +147,8 @@ function distance(a, b) {
 }
 
 function arrayToCvMat(arr, type=opencvjs.CV_64F) {
+    // console.log('arr', arr);
+    // console.log('arr.length', arr.length);
     let height = arr.length;
     let width = arr[0].length;
     let mat = new opencvjs.Mat(height, width, type);
