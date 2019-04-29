@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+# Displays cards in an html report, given card ids as args or stdin
+# Example:
+#   ./bin/display_cards grn-255 kld-105
+
+import argparse
+import fileinput
+import os
+from os.path import dirname, abspath
+import re
+import subprocess
+import sys
+import tempfile
+
+def card_id_to_url(card_id):
+    MTG_IMAGE_SERVER = "{}/assets/images/small/".format(dirname(dirname(abspath(__file__))))
+    url = MTG_IMAGE_SERVER + card_id_to_jpg(card_id)
+    return url
+
+def card_id_to_jpg(card_id):
+    [mtg_set, card_number] = card_id.split("-", 1)
+    return "{}/{}.jpg".format(mtg_set, card_number)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("card_ids", nargs='*', help='card ids')
+    parser.add_argument("--size", nargs="?", help="enforce size of images, eg 200x100")
+    args = parser.parse_args()
+
+    if args.card_ids:
+        print('reading from args.card_ids: {}'.format(args.card_ids))
+        lines = args.card_ids
+    else:
+        print('reading from stdin')
+        lines = read_stdin()
+
+    pattern = re.compile(r"""[a-z0-9]+-[a-z0-9_-]+""", re.IGNORECASE)
+
+    html_report = ''
+
+    for line in lines:
+        for match in pattern.findall(line):
+            img_abs_path = os.path.realpath(card_id_to_url(match))
+            if args.size:
+                width, height = args.size.split('x')
+                width_height_str = 'width={} height={}'.format(width, height)
+            else:
+                width_height_str = ''
+            html_report += '<img src="{}" {}/>\n'.format(img_abs_path, width_height_str)
+
+    fd, path = tempfile.mkstemp(".html")
+    with os.fdopen(fd, 'w') as tmp:
+        tmp.write(html_report)
+    print('report', path)
+
+    subprocess.call(["open", path])
+
+def read_stdin(max_lines=None):
+    for (i, line) in enumerate(sys.stdin.readlines()):
+        if max_lines is not None and i > max_lines:
+            print('DONE at i', i)
+            break
+        yield line.rstrip('\n')
+
+def read_file(filename, max_lines=None):
+    with open(filename, 'r') as file:
+        for (i, line) in enumerate(file.readlines()):
+            if max_lines is not None and i > max_lines:
+                break
+            yield line.rstrip('\n')
+
+
+if __name__ == '__main__':
+    main()
+
