@@ -54,6 +54,18 @@ describe('opencvjs_wrapper', () => {
             ]);
             done();
         })
+        it('should select correct inliers', (done) => {
+            // This is a case which initially returned [[1],[0],[1],[1],[1]] as inliers instead of [[1],[1],[1],[1],[0]]
+            // Setting ransacReprojThreshold = 2 (instead of default 3) made estimateAffinePartial2D pick the correct inliers 
+            let keypoints1 = [ [ 70, 67 ], [ 64, 68 ], [ 74, 66 ], [ 70, 62 ], [ 38, 94 ] ];
+            let keypoints2 = [ [ 19, 28 ], [ 20, 34 ], [ 17, 25 ], [ 15, 28 ], [ 33, 35 ] ];
+            let affineResult = cv.estimateAffinePartial2D(keypoints1, keypoints2);
+            assert.deepEqual(
+                affineResult.inliers,
+                [[1],[1],[1],[1],[0]]
+            );
+            done();
+        })
     })
 
     describe('#findRectangles', () => {

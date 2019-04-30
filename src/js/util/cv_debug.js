@@ -196,7 +196,7 @@ class CvDebug {
         } else {
             throw 'resize() needs width or height, or both';
         }
-        console.log(`resizing image [${img.cols}, ${img.rows}] -> [${new_width}, ${new_height}]`);
+        // console.log(`cv_debug resizing image [${img.cols}, ${img.rows}] -> [${new_width}, ${new_height}]`);
         let resizedImg = img.resize(new_height, new_width);
         return resizedImg;
     }

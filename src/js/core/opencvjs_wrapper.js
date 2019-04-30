@@ -15,7 +15,14 @@ class OpenCVJsWrapper {
         let cvMat2 = arrayToCvMat(keypoints2);
         let inliers = arrayToCvMat([[-1], [-1], [-1]], opencvjs.CV_8U);
 
-        let transform = opencvjs.estimateAffinePartial2D(cvMat1 , cvMat2, inliers);
+
+        let method = opencvjs.RANSAC;
+        let ransacReprojThreshold = 2; // default is 3
+        let maxIters = 2000;
+        let confidence = 0.99;
+        let refineIters = 10;
+
+        let transform = opencvjs.estimateAffinePartial2D(cvMat1 , cvMat2, inliers, method, ransacReprojThreshold, maxIters, confidence, refineIters);
         let transformArr = cvMatToArray(transform);
         let inliersArr = cvMatToArray(inliers);
 
