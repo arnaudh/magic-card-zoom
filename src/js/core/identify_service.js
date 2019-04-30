@@ -37,7 +37,7 @@ class IdentifyService {
     async identify(imageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.previousMatches) {
-            this.previousMatches.map(matches => matches[0].cardHeight);
+            previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeight);
         }
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(imageData);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
