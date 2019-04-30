@@ -15,6 +15,7 @@ program
     .option('-c, --cvdebug', 'Write debug images to disk')
     .option('-q, --quiet', 'Reduce noise')
     .option('-t, --tag [tag]', 'Tag to filter training items by [eg fantom]')
+    .option('-n, --item_numbers [tag]', 'Which specific dataset items to run [eg "10 12 60"]')
     .option('-l, --limit [limit]', 'limit number of training items [eg 1]')
     .parse(process.argv);
 
@@ -28,7 +29,8 @@ youtubeVideoFormats = {
   "LCZtwDL0fcM": "standard-soi",
   "5ZMM4SjlzWw": "standard-ths",
   "-tVtF73URAk": "standard-grn",
-  "IsP_H-hydNA": "standard-grn"
+  "IsP_H-hydNA": "standard-grn",
+  "A8J5LngG05k": "standard-rna"
 }
 
 // console.log('program', program);
@@ -40,6 +42,9 @@ if (!identify_service_name) {
 
 let descriptorName = program.descriptor;
 console.log('descriptorName', descriptorName);
+
+let itemNumbers = program.item_numbers && program.item_numbers.split(',').map(Number);
+console.log('itemNumbers', itemNumbers);
 
 // let available_mtg_formats = ['standard-ths'];
 let available_mtg_formats = mtg_sets.allAvailableStandards;
@@ -55,7 +60,9 @@ for (let trainingSubdir of fs.readdirSync(`test/benchmark/dataset`)) {
         let mtg_format = youtubeVideoFormats[video_id];
         let tags = info.tags ? info.tags.split(' ') : [];
         let reasonToExclude = null;
-        if (!cardheight) {
+        if (itemNumbers && !itemNumbers.includes(Number(trainingSubdir))) {
+            reasonToExclude = `item number not in selection`;
+        } else if (!cardheight) {
             reasonToExclude = `no cardheight`;
         } else if (!video_id) {
             reasonToExclude = `no video id`;
@@ -122,7 +129,7 @@ function doTest(cvwrapper) {
         for (var mtg_set of mtg_sets.expandSets(mtg_format)) {
             index = {...index, ...indexes[mtg_set]};
         }
-        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, true);
+        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, false);
     }
     let contourFinder = new ContourFinder(cvwrapper);
 
@@ -145,16 +152,6 @@ function doTest(cvwrapper) {
             
             var originalImg = new CvDebug().imread(`${dir}/input.png`);
             var originalImageData = new CvDebug().toImageData(originalImg);
-
-            let estimatedPotentialCardHeights = contourFinder.getPotentialCardHeights(originalImageData);
-            if (estimatedPotentialCardHeights.length > 0) {
-                console.log(`Overriding cardheight ${potentialCardHeights} with ${estimatedPotentialCardHeights}`);
-                potentialCardHeights = estimatedPotentialCardHeights;
-            } else {
-                if (item.true_card_id !== null) {
-                    console.log('NO RECTANGLES FOUND');
-                }
-            }
 
             if (cvDebug) {
                 // save training image and info in benchmark dir
@@ -190,7 +187,7 @@ function doTest(cvwrapper) {
             console.log(`\n*** ${resultsFile} ***`);
             results.forEach(result => {
                 let tagString = result.item.tags ? result.item.tags.join(' ') : '';
-                let result_str = `${result.debugOutputDir} [${String(result.item.true_card_id).padStart(7)}] time ${String(result.time).padStart(4)} ms matched ${String(result.card_identified).padStart(7)} | ${result.is_match ? 1 : 0} (${tagString})`;
+                let result_str = `${result.item.trainingDir} [${String(result.item.true_card_id).padStart(7)}] time ${String(result.time).padStart(4)} ms matched ${String(result.card_identified).padStart(7)} | ${result.is_match ? 1 : 0} (${tagString})`;
                 logAndAppendToFile(resultsFile, result_str);
             });
 
