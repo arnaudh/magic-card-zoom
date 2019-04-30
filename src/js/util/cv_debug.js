@@ -161,7 +161,7 @@ class CvDebug {
         var img = img_original.copy();
         let color = new cv.Vec(255, 0, 255);
         for (const point of points) {
-            img.drawCircle(cv.Point2(point[0], point[1]), 2, color);
+            img.drawCircle(new cv.Point2(point[0], point[1]), 2, color);
         }
         return img;
     }
