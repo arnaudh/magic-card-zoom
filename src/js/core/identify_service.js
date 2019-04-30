@@ -32,11 +32,11 @@ class IdentifyService {
         console.log('IdentifyService', this.name);
     }
 
-    // TODO pass whole screen with cursor position (so we can detect card contours over whole screen)
+    // TODO pass whole screen with cursor position (so we can detect card contours over whole screen) OR move contour detection outside
     // TODO deal with cardHeight (video ratio) instead of cardHeight (pixels)
     async identify(imageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
-        if (this.previousMatches) {
+        if (this.withHistory) {
             previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeight);
         }
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(imageData);
@@ -47,11 +47,11 @@ class IdentifyService {
         console.log('defaultPotentialCardHeights', defaultPotentialCardHeights);
         console.log('=> potentialCardHeights', potentialCardHeights);
         const timer = new Timer();
-        let results = null;
+        let matches = [];
         if (this.withHistory) {
-            results = this.checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug);
+            matches = this.checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug);
         }
-        if (!results || results.matches.length == 0) {
+        if (matches.length === 0) {
             for (let i = 0; i < potentialCardHeights.length; i++) {
                 let cardHeight = potentialCardHeights[i];
                 let scale = this.featuresDescriptor.cardHeight / cardHeight;
@@ -59,19 +59,22 @@ class IdentifyService {
                 let newHeight = Math.round(scale * imageData.height);
                 let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
 
-                results = this.identifySingleScale(imageDataResized, cv_debug);
-                if (results.matches.length > 0) {
-                    console.log('results.matches[0].contour', results.matches[0].contour);
-                    results.matches[0].cardHeight = contourSideLength(results.matches[0].contour);
+                matches = this.identifySingleScale(imageDataResized, cv_debug);
+                if (matches.length > 0) {
+                    console.log('matches[0].contour', matches[0].contour);
+                    matches[0].cardHeight = contourSideLength(matches[0].contour);
                     if (this.withHistory) {
-                        this.previousMatches.push(results.matches);
+                        this.previousMatches.push(matches);
                     }
                     break;
                 }
             }
         }
         console.log("identify() DONE in " + timer.get() + " ms.");
-        return results
+        return {
+            matches: matches,
+            time: timer.get()
+        }
     }
 
     checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug = null) {
@@ -93,9 +96,11 @@ class IdentifyService {
             query_descriptions.push([query_description, cardHeight, cursorPosition]);
         }
 
-        for (var i = this.previousMatches.length - 1; i >= Math.max(0, this.previousMatches.length-20); i--) {
+        let card_id = null;
+        let matches = [];
+        outer_loop: for (var i = this.previousMatches.length - 1; i >= Math.max(0, this.previousMatches.length-20); i--) {
             let previousMatch = this.previousMatches[i];
-            let card_id = previousMatch[0].card_id;
+            card_id = previousMatch[0].card_id;
             let cardHeight = previousMatch[0].cardHeight;
 
             if (checked_card_ids.includes(card_id)) {
@@ -103,32 +108,23 @@ class IdentifyService {
                 break;
             }
         
-            // let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
             for (var j = 0; j < query_descriptions.length; j++) {
                 let [query_description, cardHeight, cursorPosition] = query_descriptions[j];
                 let contour = this.featuresMatcher.checkMatch(query_description, card_id, cursorPosition);
                 console.log(`checkMatchPreviousMatches() after checkMatch ${timer.get()} ms.`);
 
                 if (contour) {
-                    let results = {
-                        matches: [{
+                    matches = [{
                             card_id: card_id,
                             cardHeight: cardHeight,
                             contour: contour
-                        }]
-                    };
-                    console.log(`checkMatchPreviousMatches() got ${card_id} DONE in ${timer.get()} ms.`);
-                    return results;
+                        }];
+                    break outer_loop;
                 }
             }
-            // console.log(`checkMatchPreviousMatches() after resize ${timer.get()} ms.`);
-        
         }
-        console.log(`checkMatchPreviousMatches() got null DONE in ${timer.get()} ms.`);
-        let results = {
-            matches: []
-        };
-        return results;
+        console.log(`checkMatchPreviousMatches() got ${card_id} DONE in ${timer.get()} ms.`);
+        return matches;
     }
 
     identifySingleScale(imageData, cv_debug = null) {        
@@ -155,10 +151,7 @@ class IdentifyService {
         }
         
         console.log("identifySingleScale() DONE in " + timer.get() + " ms.");
-        return {
-            'matches': matches_per_card_id_sorted,
-            'time': timer.get()
-        };
+        return matches_per_card_id_sorted
     }
 }
 
