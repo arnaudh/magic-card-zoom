@@ -41,10 +41,13 @@ class OpenCVJsWrapper {
 
         for (let threshold = 0; threshold < 255; threshold += 26) {
             if (threshold == 0) {
-                // TODO for threshold 0, do Canny
-                continue;
+                let edgesMat = new opencvjs.Mat(grayMat.size(), opencvjs.CV_8U);
+                opencvjs.Canny(grayMat, edgesMat, 0, 50, 5);
+                let kernel = new opencvjs.Mat({ width: 0, height: 0 }, opencvjs.CV_8U);
+                opencvjs.dilate(edgesMat, thresholdedMat, kernel);
+            } else {
+                opencvjs.threshold(grayMat, thresholdedMat, threshold, 255, opencvjs.THRESH_BINARY);
             }
-            opencvjs.threshold(grayMat, thresholdedMat, threshold, 255, opencvjs.THRESH_BINARY);
 
             let contours = new opencvjs.MatVector();
             let otherThing = new opencvjs.Mat();
