@@ -36,7 +36,7 @@ if (typeof require != 'undefined' && require.main==module) {
 async function indexImages(mtgSet) {
     let localDir = `assets/indexes/${descriptor.name}`;
     let localFilename = `${localDir}/${mtgSet}.json`;
-    if (checkAlreadyDownloaded(localFilename)) {
+    if (checkAlreadyCreated(localFilename)) {
         return;
     }
     console.log(`Indexing ${mtgSet}`);
@@ -91,9 +91,9 @@ async function readAndDescribe(file, card_id) {
         });
 }
 
-function checkAlreadyDownloaded(filename) {
+function checkAlreadyCreated(filename) {
     if (fs.existsSync(filename) && fs.statSync(filename)['size'] > 0) {
-        console.log(`Skipping because already downloaded: ${filename}`);
+        console.log(`Skipping because already created: ${filename}`);
         return true;
     } else {
         return false

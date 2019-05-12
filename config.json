@@ -23,7 +23,8 @@
     "standard-dom",
     "standard-m19",
     "standard-grn",
-    "standard-rna"
+    "standard-rna",
+    "standard-war"
   ],
   "includeTokens": true,
   "youtubeChannels": {
