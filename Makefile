@@ -2,6 +2,9 @@
 
 GIT_SHA := $(shell git rev-parse --short HEAD)
 
+git-check-uncommitted:
+	git diff-index --quiet HEAD -- || (echo 'Uncommitted changes - aborting'; exit 1)
+
 watch:
 	node src/js/build/webserver.js
 
@@ -17,6 +20,6 @@ test-watch:
 build:
 	node src/js/build/build.js
 
-package: test integration-test build
+package: git-check-uncommitted test integration-test build
 	zip -FS magic-card-zoom-$(GIT_SHA).zip -r build/
 	@echo 'Packaging done: magic-card-zoom-$(GIT_SHA).zip'
