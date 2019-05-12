@@ -1,6 +1,6 @@
 *.zip
 node_modules/
-build/
+/build/
 benchmarks/
 assets/
 *.bak
