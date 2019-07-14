@@ -162,7 +162,7 @@ function doTest(cvwrapper) {
             }
 
             return identify_services[mtg_format]
-                .identify(originalImageData, potentialCardHeights, cvDebug)
+                .identifyMultiScales(originalImageData, potentialCardHeights, cvDebug)
                 .then(result => {
                     let {matches: matches, time: time} = result;
                     let card_identified;

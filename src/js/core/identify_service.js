@@ -16,7 +16,7 @@ function logDescription(description) {
 
 class IdentifyService {
 
-    constructor(name, jsonIndex, cvwrapper, withHistory) {
+    constructor(name, jsonIndex, cvwrapper) {
         let [descriptorName, searcherName, matcherName] = name.split('_');
         this.name = name;
         this.featuresDescriptor = descriptors.fromName(descriptorName);
@@ -24,60 +24,34 @@ class IdentifyService {
             throw 'this.featuresDescriptor.cardHeight is not defined'
         }
         this.featuresMatcher = new Matcher(matcherName, jsonIndex, this.featuresDescriptor.cardHeight, searchers.fromName(searcherName), cvwrapper);
-        this.withHistory = withHistory;
-        if (this.withHistory) {
-            this.previousMatches = []; //TODO limit in time
-        }
         this.contourFinder = new ContourFinder(cvwrapper);
         console.log('IdentifyService', this.name);
     }
 
-    // TODO pass whole screen with cursor position (so we can detect card contours over whole screen) OR move contour detection outside
-    // TODO deal with cardHeight (video ratio) instead of cardHeight (pixels)
-    async identify(imageData, defaultPotentialCardHeights, cv_debug = null) {
-        let previousMatchCardHeights = [];
-        if (this.withHistory) {
-            previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeight);
-        }
-        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(imageData);
-        let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
-        potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
-        console.log('previousMatchCardHeights', previousMatchCardHeights);
-        console.log('estimatedPotentialCardHeights', estimatedPotentialCardHeights);
-        console.log('defaultPotentialCardHeights', defaultPotentialCardHeights);
-        console.log('=> potentialCardHeights', potentialCardHeights);
+    async identifyMultiScales(imageData, potentialCardHeights, cv_debug) {
         const timer = new Timer();
         let matches = [];
-        if (this.withHistory) {
-            matches = this.checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug);
-        }
-        if (matches.length === 0) {
-            for (let i = 0; i < potentialCardHeights.length; i++) {
-                let cardHeight = potentialCardHeights[i];
-                let scale = this.featuresDescriptor.cardHeight / cardHeight;
-                let newWidth = Math.round(scale * imageData.width);
-                let newHeight = Math.round(scale * imageData.height);
-                let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
+        for (let i = 0; i < potentialCardHeights.length; i++) {
+            let cardHeight = potentialCardHeights[i];
+            let scale = this.featuresDescriptor.cardHeight / cardHeight;
+            let newWidth = Math.round(scale * imageData.width);
+            let newHeight = Math.round(scale * imageData.height);
+            let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
 
-                matches = this.identifySingleScale(imageDataResized, cv_debug);
-                if (matches.length > 0) {
-                    console.log('matches[0].contour', matches[0].contour);
-                    matches[0].cardHeight = contourSideLength(matches[0].contour);
-                    if (this.withHistory) {
-                        this.previousMatches.push(matches);
-                    }
-                    break;
-                }
+            matches = this.identifySingleScale(imageDataResized, cv_debug);
+            if (matches.length > 0) {
+                console.log('matches[0].contour', matches[0].contour);
+                matches[0].cardHeight = contourSideLength(matches[0].contour);
+                break;
             }
         }
-        console.log("identify() DONE in " + timer.get() + " ms.");
         return {
             matches: matches,
             time: timer.get()
         }
     }
 
-    checkMatchPreviousMatches(imageData, potentialCardHeights, cv_debug = null) {
+    checkMatchPreviousMatches(imageData, previousMatches, potentialCardHeights, cv_debug = null) {
         const timer = new Timer();
         let checked_card_ids = [];
 
@@ -98,8 +72,8 @@ class IdentifyService {
 
         let card_id = null;
         let matches = [];
-        outer_loop: for (var i = this.previousMatches.length - 1; i >= Math.max(0, this.previousMatches.length-20); i--) {
-            let previousMatch = this.previousMatches[i];
+        outer_loop: for (var i = previousMatches.length - 1; i >= 0; i--) {
+            let previousMatch = previousMatches[i];
             card_id = previousMatch[0].card_id;
             let cardHeight = previousMatch[0].cardHeight;
 

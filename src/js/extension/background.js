@@ -13,7 +13,7 @@ require('../core/opencvjs_wrapper.js').initialize(function(cvwrapper_){
 });
 
 const indexLoader = require('./index_loader.js');
-const IdentifyService = require('../core/identify_service.js');
+const IdentifySession = require('../core/identify_session.js');
 const DisplayService = require('./display_service.js');
 const mtg_sets = require('../mtg_sets.js');
 const config = require('../../../config.json');
@@ -114,9 +114,8 @@ chrome.runtime.onMessage.addListener(
             .then(index => { 
               console.log('index size', Object.keys(index).length);
               console.log('USING cvwrapper in background.js');
-              let identify_service = new IdentifyService(config.identifyServiceName, index, cvwrapper);
-              mcz_active_tabs[currentTabId].identifyService = identify_service;
-              console.log(`mcz_active_tabs (set identifyService of ${currentTabId})`, Object.keys(mcz_active_tabs));
+              mcz_active_tabs[currentTabId].identifySession = new IdentifySession(config.identifyServiceName, index, cvwrapper, true);
+              console.log(`mcz_active_tabs (set identifySession of ${currentTabId})`, Object.keys(mcz_active_tabs));
 
               chrome.tabs.executeScript(currentTabId, {
                 file: 'main.bundle.js'
@@ -273,7 +272,7 @@ function cropImage(dataUrl, cropLocation, cropSize, callback) {
 
 function identify_query_in_frontend(imageData, potentialCardHeights, messageID, tabId, sendResponse) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
-  mcz_active_tabs[tabId].identifyService.identify(imageData, potentialCardHeights)
+  mcz_active_tabs[tabId].identifySession.identify(imageData, potentialCardHeights)
     .then(results => {
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];
