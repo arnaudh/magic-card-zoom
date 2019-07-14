@@ -223,7 +223,6 @@ let timer = new Timer();
 opencvjs['onRuntimeInitialized']=()=>{
     console.log('onRuntimeInitialized()');
     console.log(`opencv.js loaded in ${timer.get()} ms.`);
-    console.log('opencvjs.estimateAffinePartial2D', opencvjs.estimateAffinePartial2D);
     console.log('CALLING CALLBACK');
     let opencvjsWrapper = new OpenCVJsWrapper();
     callback(opencvjsWrapper);
