@@ -14,14 +14,13 @@ class IdentifySession {
         this.contourFinder = new ContourFinder(cvwrapper);
     }
     
-    // TODO pass whole screen with cursor position (so we can detect card contours over whole screen)
     // TODO deal with cardHeight (video ratio) instead of cardHeight (pixels)
-    async identify(imageData, defaultPotentialCardHeights, cv_debug = null) {
+    async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
             previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeight);
         }
-        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(imageData);
+        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
         potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
         console.log('|previousMatchCardHeights', previousMatchCardHeights);
@@ -31,10 +30,10 @@ class IdentifySession {
         const timer = new Timer();
         let matches = [];
         if (this.withHistory) {
-            matches = this.identifyService.checkMatchPreviousMatches(imageData, this.previousMatches.slice(-20), potentialCardHeights, cv_debug);
+            matches = this.identifyService.checkMatchPreviousMatches(closeupImageData, this.previousMatches.slice(-20), potentialCardHeights, cv_debug);
         }
         if (matches.length === 0) {
-            let resultMultiScales = await this.identifyService.identifyMultiScales(imageData, potentialCardHeights, cv_debug);
+            let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, cv_debug);
             if (resultMultiScales.matches.length > 0) {
                 matches = resultMultiScales.matches;
                 this.previousMatches.push(matches);

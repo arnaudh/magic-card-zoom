@@ -208,6 +208,9 @@ function identifyCard(message, tab, sendResponse) {
   
   const clientX = cssPxToDevicePixel(message.data.mousePosition.clientX);
   const clientY = cssPxToDevicePixel(message.data.mousePosition.clientY);
+  const videoX = cssPxToDevicePixel(message.data.videoBoundingRect.x);
+  const videoY = cssPxToDevicePixel(message.data.videoBoundingRect.y);
+  const videoWidth = cssPxToDevicePixel(message.data.videoBoundingRect.width);
   const videoHeight = cssPxToDevicePixel(message.data.videoBoundingRect.height);
   const channelID = message.data.page.channelID;
 
@@ -219,8 +222,7 @@ function identifyCard(message, tab, sendResponse) {
   });
   const maxCardHeight = Math.max(...potentialCardHeights);
 
-  const cropLocation = [clientX, clientY];
-  const cropSize = [maxCardHeight*2, maxCardHeight*2];
+  const cropLength = maxCardHeight*2;
 
   lastVideoHeight = videoHeight;
   chrome.tabs.captureVisibleTab(
@@ -228,10 +230,15 @@ function identifyCard(message, tab, sendResponse) {
     {format: "jpeg"},
     function(dataUrl) {
       if (checkMessageOutdated(message.messageID, 'after captureVisibleTab')) return;
-      cropImage(dataUrl, cropLocation, cropSize, function(imageData){
-        if (checkMessageOutdated(message.messageID, 'after cropImage')) return;
-        identify_query_in_frontend(imageData, potentialCardHeights, message.messageID, tab.id, sendResponse);
-      });
+      cropImage2(
+        dataUrl,
+        {'x':videoX, 'y':videoY, 'width':videoWidth, 'height':videoHeight}, 
+        {'x':clientX-cropLength/2, 'y':clientY-cropLength/2, 'width':cropLength, 'height':cropLength},
+        function(imageData1, imageData2){
+          if (checkMessageOutdated(message.messageID, 'after cropImage')) return;
+          identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, message.messageID, tab.id, sendResponse);
+        }
+      );
 
     }
   );
@@ -270,9 +277,39 @@ function cropImage(dataUrl, cropLocation, cropSize, callback) {
   sourceImage.src = dataUrl;
 }
 
-function identify_query_in_frontend(imageData, potentialCardHeights, messageID, tabId, sendResponse) {
+
+function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
+  console.log('boundingRect1', boundingRect1);
+  console.log('boundingRect2', boundingRect2);
+  let sourceImage = new Image();
+
+  sourceImage.onload = function() {
+    // Create a canvas with the desired dimensions
+    let canvas = document.createElement("canvas");
+    canvas.width = sourceImage.width;
+    canvas.height = sourceImage.height;
+
+    // Scale and draw the source image to the canvas
+    let ctx = canvas.getContext('2d');
+    ctx.drawImage(sourceImage, 0, 0);
+
+    //TODO save only cropped blob
+    // canvas.toBlob(function(blob) {
+    //   lastBlob = blob;
+    //   // saveAs(blob, `cropImage2.png`);
+    // });
+
+    let imageData1 = ctx.getImageData(boundingRect1.x, boundingRect1.y, boundingRect1.width, boundingRect1.height);
+    let imageData2 = ctx.getImageData(boundingRect2.x, boundingRect2.y, boundingRect2.width, boundingRect2.height);
+    callback(imageData1, imageData2);
+  }
+
+  sourceImage.src = dataUrl;
+}
+
+function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
-  mcz_active_tabs[tabId].identifySession.identify(imageData, potentialCardHeights)
+  mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights)
     .then(results => {
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];
