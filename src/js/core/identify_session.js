@@ -18,7 +18,7 @@ class IdentifySession {
     async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
-            previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeight);
+            previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeightRatio * videoImageData.height);
         }
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
@@ -36,6 +36,7 @@ class IdentifySession {
             let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, cv_debug);
             if (resultMultiScales.matches.length > 0) {
                 matches = resultMultiScales.matches;
+                matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
                 this.previousMatches.push(matches);
             }
         }
