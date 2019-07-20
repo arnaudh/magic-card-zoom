@@ -28,7 +28,7 @@ class IdentifyService {
         console.log('IdentifyService', this.name);
     }
 
-    async identifyMultiScales(imageData, potentialCardHeights, cv_debug) {
+    async identifyMultiScales(imageData, potentialCardHeights, previousMatches, cv_debug) {
         const timer = new Timer();
         let matches = [];
         for (let i = 0; i < potentialCardHeights.length; i++) {
@@ -37,67 +37,62 @@ class IdentifyService {
             let newWidth = Math.round(scale * imageData.width);
             let newHeight = Math.round(scale * imageData.height);
             let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
+            console.log(`identifyMultiScales: resized[${i}] ${timer.get()}`);
 
-            matches = this.identifySingleScale(imageDataResized, cv_debug);
+
+            let imgSize = [imageDataResized.width, imageDataResized.height];
+            let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
+            let query_description = this.featuresDescriptor.describe(imageDataResized, cv_debug);
+            console.log(`identifyMultiScales: described[${i}] ${timer.get()}`);
+
+            matches = this.checkMatchPreviousMatches(previousMatches, query_description, cursorPosition);
+            console.log(`identifyMultiScales: checkedPreviousMatches[${i}] ${timer.get()}`);
+
+            if (matches.length === 0) {
+                matches = this.identifySingleScale(imageDataResized, cv_debug);
+                console.log(`identifyMultiScales: identified[${i}] ${timer.get()}`);
+            }
             if (matches.length > 0) {
-                console.log('matches[0].contour', matches[0].contour);
-                matches[0].cardHeight = contourSideLength(matches[0].contour);
+                matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
                 break;
             }
         }
+        console.log(`identifyMultiScales: DONE ${timer.get()}`);
+        console.log(`identifyMultiScales RETURN ${{matches: matches, time: timer.get() }}`);
         return {
             matches: matches,
             time: timer.get()
         }
     }
 
-    checkMatchPreviousMatches(imageData, previousMatches, potentialCardHeights, cv_debug = null) {
+
+    checkMatchPreviousMatches(previousMatches, query_description, cursorPosition) {
         const timer = new Timer();
         let checked_card_ids = [];
-
-        let query_descriptions = [];
-        for (let i = 0; i < potentialCardHeights.length; i++) {
-            let cardHeight = potentialCardHeights[i];
-            let scale = this.featuresDescriptor.cardHeight / cardHeight;
-            let newWidth = Math.round(scale * imageData.width);
-            let newHeight = Math.round(scale * imageData.height);
-            let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
-            
-            let imgSize = [imageDataResized.width, imageDataResized.height];
-            let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
-            let query_description = this.featuresDescriptor.describe(imageDataResized, cv_debug);
-            console.log(`checkMatchPreviousMatches() after describe ${timer.get()} ms.`);
-            query_descriptions.push([query_description, cardHeight, cursorPosition]);
-        }
-
-        let card_id = null;
         let matches = [];
-        outer_loop: for (var i = previousMatches.length - 1; i >= 0; i--) {
+        for (var i = previousMatches.length - 1; i >= 0; i--) {
             let previousMatch = previousMatches[i];
-            card_id = previousMatch[0].card_id;
-            let cardHeight = previousMatch[0].cardHeight;
+            let card_id = previousMatch[0].card_id;
 
             if (checked_card_ids.includes(card_id)) {
-                console.log(`checkMatchPreviousMatches() not checking again ${card_id}`);
+                continue;
+            }
+            checked_card_ids.push(card_id);
+
+            let contour = this.featuresMatcher.checkMatch(query_description, card_id, cursorPosition);
+            console.log(`checkMatchPreviousMatches: checkMatch[card ${i}] ${timer.get()}`);
+
+            if (contour) {
+
+                matches = [{
+                    card_id: card_id,
+                    // cardHeight: cardHeight,
+                    contour: contour
+                }];
                 break;
             }
-        
-            for (var j = 0; j < query_descriptions.length; j++) {
-                let [query_description, cardHeight, cursorPosition] = query_descriptions[j];
-                let contour = this.featuresMatcher.checkMatch(query_description, card_id, cursorPosition);
-                console.log(`checkMatchPreviousMatches() after checkMatch ${timer.get()} ms.`);
-
-                if (contour) {
-                    matches = [{
-                            card_id: card_id,
-                            cardHeight: cardHeight,
-                            contour: contour
-                        }];
-                    break outer_loop;
-                }
-            }
         }
-        console.log(`checkMatchPreviousMatches() got ${card_id} DONE in ${timer.get()} ms.`);
+        console.log(`checkMatchPreviousMatches: got ${matches.length} match DONE ${timer.get()}`);
         return matches;
     }
 
@@ -113,7 +108,7 @@ class IdentifyService {
         }
         
         let query_description = this.featuresDescriptor.describe(imageData, cv_debug);
-        console.log(`describe() got ${query_description.keypoints.length} keypoints DONE in ${timer.get()} ms.`);
+        console.log(`identifySingleScale: describe() got ${query_description.keypoints.length} keypoints in ${timer.get()} ms.`);
         let imgSize = [imageData.width, imageData.height];
         let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
         let result = this.featuresMatcher.matchAroundCursor(query_description, cursorPosition, cv_debug);
@@ -124,7 +119,7 @@ class IdentifyService {
             matches_per_card_id_sorted = [];
         }
         
-        console.log("identifySingleScale() DONE in " + timer.get() + " ms.");
+        console.log("identifySingleScale: DONE in " + timer.get() + " ms.");
         return matches_per_card_id_sorted
     }
 }
@@ -134,14 +129,8 @@ function contourSideLength(c) {
     let l1 = distance(c[1], c[2]);
     let l2 = distance(c[2], c[3]);
     let l3 = distance(c[3], c[0]);
-    console.log('l0', l0);
-    console.log('l1', l1);
-    console.log('l2', l2);
-    console.log('l3', l3);
     let sidesSorted = [l0, l1, l2, l3].sort();
-    console.log('sidesSorted');
     let averageLength = (sidesSorted[2]+sidesSorted[3])/2;
-    console.log('averageLength', averageLength);
     return averageLength;
 }
 

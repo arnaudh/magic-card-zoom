@@ -18,7 +18,7 @@ class IdentifySession {
     async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
-            previousMatchCardHeights = this.previousMatches.map(matches => matches[0].cardHeightRatio * videoImageData.height);
+            previousMatchCardHeights = this.previousMatches.slice(-1).map(matches => matches[0].cardHeightRatio * videoImageData.height);
         }
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
@@ -29,16 +29,13 @@ class IdentifySession {
         console.log('|=> potentialCardHeights', potentialCardHeights);
         const timer = new Timer();
         let matches = [];
-        if (this.withHistory) {
-            matches = this.identifyService.checkMatchPreviousMatches(closeupImageData, this.previousMatches.slice(-20), potentialCardHeights, cv_debug);
-        }
-        if (matches.length === 0) {
-            let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, cv_debug);
-            if (resultMultiScales.matches.length > 0) {
-                matches = resultMultiScales.matches;
-                matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
-                this.previousMatches.push(matches);
-            }
+
+        let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches);
+        console.log(`resultMultiScales = ${resultMultiScales}`);
+        if (resultMultiScales.matches.length > 0) {
+            matches = resultMultiScales.matches;
+            matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
+            this.previousMatches.push(matches);
         }
         console.log("identify() DONE in " + timer.get() + " ms.");
         return {
