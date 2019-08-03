@@ -61,6 +61,7 @@ The following instructions guide you through setting up, building and loading th
 Make sure you have the following installed:
 - [NodeJS](https://nodejs.org/)
 - [Yarn](https://yarnpkg.com/en/docs/install)
+- [CMake](https://cmake.org/download/)
 
 ### Clone the repository
 
