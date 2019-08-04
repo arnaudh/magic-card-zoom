@@ -1,4 +1,3 @@
-console.log('brute_force_searcher.js');
 
 class BruteForceSearcher {
   constructor(name) {

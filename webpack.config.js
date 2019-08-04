@@ -73,7 +73,7 @@ var options = {
       filename: "popup.html",
       chunks: ["popup"]
     }),
-    new WriteFilePlugin()
+    // new WriteFilePlugin()
   ]
 };
 

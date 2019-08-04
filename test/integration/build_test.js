@@ -7,16 +7,7 @@ const fs = require('fs-extra')
 
 const buildPath = path.join(__dirname, '../../build');
 
-fs.removeSync(buildPath);
-
 describe('build & install', () => {
-  
-  it('it builds the extension', (done) => {
-    exec('node src/js/build/build.js', (error, stdout, stderr) => {
-      assert.equal(error, null);
-      done();
-    });
-  }).timeout(15000);
 
   // boots a Chrome instance using Puppeteer and adds the extension
   it('it installs the extension', async () => {

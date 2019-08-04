@@ -1,24 +1,29 @@
-.PHONY: build test
+.PHONY: test
 
+ALL_SOURCES_AND_ASSETS := $(shell find src/ assets/metadata/ assets/indexes/)
 GIT_SHA := $(shell git rev-parse --short HEAD)
 
-git-check-uncommitted:
-	git diff-index --quiet HEAD -- || (echo 'Uncommitted changes - aborting'; exit 1)
+download-images-and-metadata:
+	node src/js/util/download_all.js
 
-watch:
-	node src/js/build/webserver.js
+index-images:
+	node src/js/util/index_images.js
+
+build: $(ALL_SOURCES_AND_ASSETS)
+	node src/js/build/build.js
+	@echo 'Build done: build/'
 
 test:
 	yarn test --recursive test/unit/
 
-integration-test:
-	yarn test test/integration/build_test.js
-
 test-watch:
 	yarn test-watch
 
-build:
-	node src/js/build/build.js
+integration-test: build
+	yarn test test/integration/build_test.js
+
+git-check-uncommitted:
+	git diff-index --quiet HEAD -- || (echo 'Uncommitted changes - aborting'; exit 1)
 
 package: git-check-uncommitted test integration-test build
 	zip -FS magic-card-zoom-$(GIT_SHA).zip -r build/
