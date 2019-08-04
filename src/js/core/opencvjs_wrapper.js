@@ -209,12 +209,21 @@ function cvMatToArray(mat) {
     return arr;
 }
 
-let callback;
+// This is all quite a mess
+// How do we ensure all callbacks are called? (race condition)
+let callbacks = [];
+let opencvjsWrapper;
 
 module.exports = {
   initialize: function (callback_) {
-    console.log('opencvjs_wrapper.initialize(), setting callback');
-    callback = callback_;
+    console.log('opencvjs_wrapper.initialize()');
+    if (opencvjsWrapper) {
+        console.log('We have opencvjsWrapper');
+        callback_(opencvjsWrapper);
+    } else {
+        console.log('We dont have opencvjsWrapper');
+        callbacks.push(callback_);
+    }
   }
 };
 
@@ -223,9 +232,10 @@ let timer = new Timer();
 opencvjs['onRuntimeInitialized']=()=>{
     console.log('onRuntimeInitialized()');
     console.log(`opencv.js loaded in ${timer.get()} ms.`);
-    console.log('CALLING CALLBACK');
-    let opencvjsWrapper = new OpenCVJsWrapper();
-    callback(opencvjsWrapper);
+    opencvjsWrapper = new OpenCVJsWrapper();
+    console.log('CALLING CALLBACKS');
+    callbacks.forEach(c => c(opencvjsWrapper));
+    console.log('onRuntimeInitialized() DONE');
 };
 
 // simple timer class
@@ -239,3 +249,5 @@ function Timer() {
   };
   this.reset();
 };
+
+console.log('opencvjs_wrapper.js END');
