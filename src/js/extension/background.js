@@ -214,15 +214,8 @@ function identifyCard(message, tab, sendResponse) {
   const videoHeight = cssPxToDevicePixel(message.data.videoBoundingRect.height);
   const channelID = message.data.page.channelID;
 
-
-  const cardToScreenRatios = config.youtubeChannels[channelID].card_heights;
-  const potentialCardHeights = cardToScreenRatios.map(function(ratio) {
-    let cardHeight = Math.round(ratio * videoHeight);
-    return cardHeight;
-  });
-  const maxCardHeight = Math.max(...potentialCardHeights);
-
-  const cropLength = maxCardHeight*2;
+  const potentialCardHeights = [];
+  const cropLength = 200;
 
   lastVideoHeight = videoHeight;
   chrome.tabs.captureVisibleTab(

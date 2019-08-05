@@ -5,20 +5,11 @@ let channelUrlRegex = /.*youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
 
 channelID = getChannelId();
 videoPublishDate = getVideoPublishDate();
-if (channelID === null) {
-  // console.log('Channel');
+if (videoPublishDate === null) {
   chrome.runtime.sendMessage({
     messageType: "popupMessage",
     data: {
-      message: `Could not detect YouTube channel. Try again when the page is fully loaded.`
-    }
-  });
-} else if (!channelID in config.youtubeChannels) {
-  console.log('We not good');
-  chrome.runtime.sendMessage({
-    messageType: "popupMessage",
-    data: {
-      message: `YouTube channel not supported.\nOnly the official "Magic: The Gathering" channel is supported.`
+      message: `Could not detect video publish date. Try again when the page is fully loaded.`
     }
   });
 } else {
@@ -48,7 +39,11 @@ function getChannelId() {
 
 function getVideoPublishDate() {
   let dateElements = document.getElementsByClassName('date');
-  let publishDateString = dateElements[0].textContent;
-  let publishDate = new Date(Date.parse(publishDateString));
-  return publishDate;
+  if (dateElements.length > 0) {
+    let publishDateString = dateElements[0].textContent;
+    let publishDate = new Date(Date.parse(publishDateString));
+    return publishDate;
+  }
+  console.log("Couldn't find video publish date on the page");
+  return null;
 }
