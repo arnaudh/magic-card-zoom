@@ -85,13 +85,13 @@ function findMtgStandardInText(text) {
     return null;
 }
 
-function getStandardName(standard) {
+function getStandardInfo(standard) {
     let match = /^standard-(.+)$/.exec(standard);
     if (match) {
         let legalSets = getLegalSetsForStandard(match[1]);
-        let firstSetName = getMtgSetName(legalSets[0]);
-        let lastSetName = getMtgSetName(legalSets[legalSets.length-1]);
-        return `Standard ${firstSetName} - ${lastSetName}`;
+        return {
+            'sets': legalSets.map(code => setsDict[code])
+        };
     } else {
         throw Error(`standard "${standard}" was not of the form "standard-xxx"`);
     }
@@ -114,6 +114,6 @@ module.exports.expandSets = expandSets;
 module.exports.allAvailableSets = allAvailableSets;
 module.exports.allAvailableStandards = allAvailableStandards;
 module.exports.getMtgSetName = getMtgSetName;
-module.exports.getStandardName = getStandardName;
+module.exports.getStandardInfo = getStandardInfo;
 module.exports.findMtgStandardInText = findMtgStandardInText;
 

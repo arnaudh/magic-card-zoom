@@ -13,22 +13,69 @@ chrome.runtime.onMessage.addListener(
             case 'popupShowAvailableFormats':
                 let suggested_format = message.data.suggested_format;
                 let available_formats = message.data.available_formats;
+                let video_publish_date = new Date(Date.parse(message.data.video_publish_date)); // chrome messages are JSON, any date is received as a String
+                // Assumes formats ordered from newest to oldest
+                let lastSetReleasedBeforeVideo = available_formats.findIndex(f => {
+                    let legalSets = f.info.sets;
+                    let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
+                    let isSetReleasedBeforeVideo = new Date(Date.parse(lastSetReleasedAt)) < video_publish_date;
+                    return isSetReleasedBeforeVideo
+                })
+
                 
                 // display form
                 let HTML_string = ''
                 // HTML_string += '<form id="my-form"  onsubmit="return false;">'
                 var any_checked = false;
+
+                HTML_string += `<table>`;
                 for (var i = 0; i < available_formats.length; i++) {
                     var checked_string = '';
+                    let legalSets = available_formats[i].info.sets;
+                    let firstSetName = legalSets[0].name;
+                    let lastSetName = legalSets[legalSets.length-1].name;
+                    let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
+                    let isSuggestedBasedOnVideoTitle = false;
+                    let isSuggestedBasedOnVideoPublishedDate = false;
                     if (suggested_format !== null && suggested_format.value === available_formats[i].value) {
                         any_checked = true;
                         checked_string = 'checked';
+                        lastSetName = `<strong>${lastSetName}</strong>`;
+                        isSuggestedBasedOnVideoTitle = true;
+                        lastSetReleasedAt = `<strong>${lastSetReleasedAt}</strong>`;
+                        lastSetName = `<strong>${lastSetName}</strong>`;
                     }
-                    HTML_string += `<div>`;
+                    if (i === lastSetReleasedBeforeVideo) {
+                        // emphasize the last set released before the video was published
+                        lastSetReleasedAt = `<strong>${lastSetReleasedAt}</strong>`;
+                        lastSetName = `<strong>${lastSetName}</strong>`;
+                        isSuggestedBasedOnVideoPublishedDate = true;
+                    }
+                    
+                    if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
+                        HTML_string += `<tr class="tooltip">`;
+                        HTML_string += `<td>`;
+                        HTML_string += `<span class="tooltiptext">`;
+                        let hints = [];
+                        if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
+                        if (isSuggestedBasedOnVideoPublishedDate) { hints.push('publish date'); }
+                        HTML_string += `Guess based on the <br>video ${hints.join(' and ')}`;
+                        HTML_string += `</span>`;
+                    } else {
+                        HTML_string += `<tr>`;
+                        HTML_string += `<td>`;
+                    }
                     HTML_string += `<input type="radio" id="radio-${i}" name="mtg_format" value="${available_formats[i].value}" ${checked_string}>`;
-                    HTML_string += `<label for="radio-${i}">${available_formats[i].text}</label>`;
-                    HTML_string += `</div>`;
+                    HTML_string += `</td>`;
+                    HTML_string += `<td>`;
+                    HTML_string += `<label for="radio-${i}">${lastSetName}</label>`;
+                    HTML_string += `</td>`;
+                    HTML_string += `<td>`;
+                    HTML_string += `<label for="radio-${i}">${lastSetReleasedAt}</label>`;
+                    HTML_string += `</td>`;
+                    HTML_string += `</tr>`;
                 }
+                HTML_string += `</table>`;
                 HTML_string += '<button id="my-button">Start MCZ!</button>';
                 // HTML_string += '</form>';
                 mainDiv.innerHTML = HTML_string;

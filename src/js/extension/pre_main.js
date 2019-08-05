@@ -4,6 +4,7 @@ const config = require("../../../config.json");
 let channelUrlRegex = /.*youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
 
 channelID = getChannelId();
+videoPublishDate = getVideoPublishDate();
 if (channelID === null) {
   // console.log('Channel');
   chrome.runtime.sendMessage({
@@ -22,7 +23,12 @@ if (channelID === null) {
   });
 } else {
   console.log('We good');
-  chrome.runtime.sendMessage({messageType: "okToShowAvailableFormats"});
+  chrome.runtime.sendMessage({
+    messageType: "okToShowAvailableFormats",
+    data: {
+      videoPublishDate: videoPublishDate
+    }
+  });
 }
 
 
@@ -36,6 +42,13 @@ function getChannelId() {
       return channelID;
     }
   }
-  console.log(`Couldn't find channel ID on the page`);
+  console.log("Couldn't find channel ID on the page");
   return null;
+}
+
+function getVideoPublishDate() {
+  let dateElements = document.getElementsByClassName('date');
+  let publishDateString = dateElements[0].textContent;
+  let publishDate = new Date(Date.parse(publishDateString));
+  return publishDate;
 }

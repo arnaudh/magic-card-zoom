@@ -15,3 +15,26 @@ label {
 button {
     float: right;
 }
+
+
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    width: 230px;
+    padding: 5px;
+    margin: 20px 0px 0px 0px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

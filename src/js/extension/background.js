@@ -81,22 +81,22 @@ chrome.runtime.onMessage.addListener(
         getCurrentTab(function(currentTab) {
           console.log('currentTab', currentTab);
           let availableFormats = mtg_sets.allAvailableStandards.map(standard => {
-            let standardName = mtg_sets.getStandardName(standard);
+            let standardInfo = mtg_sets.getStandardInfo(standard);
             return {
               'value': standard,
-              'text': standardName
+              'info': standardInfo
             };
           })
           availableFormats.reverse();
           let potentialMtgStandard = mtg_sets.findMtgStandardInText(currentTab.title);
           let suggested_format = potentialMtgStandard ? {'value': potentialMtgStandard} : null;
-          console.log('HERE background sending popupShowAvailableFormats');
           chrome.runtime.sendMessage({
             messageType: "popupShowAvailableFormats",
             createdAt: new Date().toISOString(),
             data: {
               'available_formats': availableFormats,
               'suggested_format': suggested_format,
+              'video_publish_date': message.data.videoPublishDate,
               'status': 'success',
               'available_action': 'turn-on'
             }
