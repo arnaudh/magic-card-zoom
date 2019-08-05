@@ -24,7 +24,8 @@
     "standard-m19",
     "standard-grn",
     "standard-rna",
-    "standard-war"
+    "standard-war",
+    "standard-m20"
   ],
   "includeTokens": true,
   "devMode": false
