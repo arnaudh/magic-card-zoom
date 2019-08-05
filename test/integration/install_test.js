@@ -1,9 +1,5 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
-const util = require('util')
-const { exec } = require('child_process');
-const assert = require('assert');
-const fs = require('fs-extra')
 
 const buildPath = path.join(__dirname, '../../build');
 

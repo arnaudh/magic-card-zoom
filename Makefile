@@ -20,7 +20,7 @@ test-watch:
 	yarn test-watch
 
 integration-test: build
-	yarn test test/integration/build_test.js
+	yarn test --recursive test/integration/
 
 git-check-uncommitted:
 	git diff-index --quiet HEAD -- || (echo 'Uncommitted changes - aborting'; exit 1)
