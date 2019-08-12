@@ -63,9 +63,7 @@ var readyStateCheckInterval = setInterval(function() {
     loadingPopup.className = "loading-popup";
     loadingPopup.appendChild(loadingPopupImage);
 
-    // (on youtube) 
-    // we can't add a child element to the <video>, and the parent has 0 height, so we add the popup to the parent's parent
-    parentOfPopup = theVideo.parentNode.parentNode;
+    parentOfPopup = body;
     parentOfPopup.appendChild(popup);
     parentOfPopup.appendChild(loadingPopup);
 
@@ -219,12 +217,11 @@ function mymousemove(evt){
   lastMove = new Date();
   mouse_stopped_to_identify = false;
 
-  const parentRect = parentOfPopup.getBoundingClientRect();
-  const parentWidth = parentRect.width;
-  const parentHeight = parentRect.height;
+  const parentWidth = document.documentElement.clientWidth;
+  const parentHeight = document.documentElement.clientHeight;
 
-  const x = evt.clientX - parentRect.left;
-  const y = evt.clientY - parentRect.top;
+  const x = evt.clientX;
+  const y = evt.clientY;
 
 // TODO read from css class
   const cardWidth = 312;
@@ -237,7 +234,7 @@ function mymousemove(evt){
   const loadingX = (x + spaceX + cardWidth > parentWidth) ? (x - spaceX - loadingWidth) : (x + spaceX);
   const popupX   = (x + spaceX + cardWidth > parentWidth) ? (x - spaceX - cardWidth)    : (x + spaceX);
   const loadingY = y;
-  const popupY = bounded(y - cardHeight/2, 0, parentHeight - cardHeight);
+  const popupY = bounded(y - cardHeight/2, 10, parentHeight - cardHeight - 10);
 
   loadingPopup.style.left = `${loadingX}px`;
   loadingPopup.style.top  = `${loadingY}px`;
