@@ -3,18 +3,17 @@ console.log('identify_session.js');
 const ContourFinder = require('./contour_finder.js');
 const IdentifyService = require('./identify_service.js');
 
+const MAX_HISTORY_SIZE = 10;
+
 class IdentifySession {
 
     constructor(name, jsonIndex, cvwrapper, withHistory) {
         this.identifyService = new IdentifyService(name, jsonIndex, cvwrapper);
         this.withHistory = withHistory;
-        if (this.withHistory) {
-            this.previousMatches = []; //TODO limit in time
-        }
+        this.previousMatches = [];
         this.contourFinder = new ContourFinder(cvwrapper);
     }
     
-    // TODO deal with cardHeight (video ratio) instead of cardHeight (pixels)
     async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
@@ -35,7 +34,12 @@ class IdentifySession {
         if (resultMultiScales.matches.length > 0) {
             matches = resultMultiScales.matches;
             matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
-            this.previousMatches.push(matches);
+            if (this.withHistory) {
+                this.previousMatches.push(matches);
+                if (this.previousMatches.length > MAX_HISTORY_SIZE) {
+                    this.previousMatches.shift(1); // Remove oldest entry
+                }
+            }
         }
         console.log("identify() DONE in " + timer.get() + " ms.");
         return {
