@@ -6,6 +6,16 @@ const cheerio = require('cheerio');
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
+const ignoreUnrecognizedSetNames = [
+    'exclusive cards',
+    // future sets
+    'Theros: Beyond Death',
+    'Ikoria: Lair of Behemoths',
+    'Ikoria: Land of Behemoths',
+    'Core Set 2021',
+    'Zendikar Rising'
+];
+
 function downloadStandardInfo() {
     console.log('################################################');
     console.log('#   Downloading Standard info from Wikipedia   #');
@@ -25,6 +35,7 @@ function downloadStandardInfo() {
             }
 
             let mtgStandardDict = {};
+            let haveErrors = false;
 
             $('.wikitable tr').each(function (i, elem) {
                 let tds = $(this).find('td');
@@ -36,14 +47,17 @@ function downloadStandardInfo() {
                         mtgSet = mtgSet.trim();
                         if (mtgSet && ! /^[-"&(]|Revised.*/.exec(mtgSet)) {
                             let sanitizedMtgSetName = mtgSet
-                                .replace(/\[\d+\]/, '')
+                                .replace(/\[.*\]/, '')
                                 .replace(/&apos;/, "'");
                             let mtgSetCode = mtgSetNameToCode(sanitizedMtgSetName);
                             if (mtgSetCode) {
                                 mtgSetsList.push(mtgSetCode);
+                            } else if (ignoreUnrecognizedSetNames.includes(sanitizedMtgSetName)) {
+                                console.log(`Warning: ignoring set name "${sanitizedMtgSetName}"`);
                             } else {
-                                console.log(`Unknown set name "${sanitizedMtgSetName}" - skipping`);
-                                // throw Error(`Unknown mtg set name ${sanitizedMtgSet}`);
+                                haveErrors = true;
+                                console.log(`Error: unknown set name "${sanitizedMtgSetName}"`);
+                                // throw Error(`Unknown mtg set name ${sanitizedMtgSetName}`);
                             }
                         }
                     }
@@ -57,6 +71,10 @@ function downloadStandardInfo() {
                     mtgStandardDict[lastMtgSet] = mtgSetsList;
                 }
             });
+
+            if (haveErrors) {
+                throw Error(`Errors in downloading standard info (see messages above)`);
+            }
 
             // var prettyBody = JSON.stringify(mtgStandardDict, null, 4);
             var prettyBody = '{\n';
