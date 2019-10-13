@@ -11,9 +11,9 @@ chrome.runtime.sendMessage({
 });
 
 function getYoutubeVideoPublishDate() {
-  let dateElements = document.getElementsByClassName('date');
-  if (dateElements.length > 0) {
-    let publishDateString = dateElements[0].textContent;
+  let dateDiv = document.getElementById('date');
+  if (dateDiv) {
+    let publishDateString = dateDiv.textContent.replace(/[^0-9a-z\s]/gi, '');
     let publishDate = new Date(Date.parse(publishDateString));
     return publishDate;
   }
