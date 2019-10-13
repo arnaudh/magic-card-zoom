@@ -55,6 +55,14 @@ var options = {
     new CopyWebpackPlugin(
       mtg_sets.allAvailableSets.map(mtgSet => {
         return {
+          from: `assets/images/sets/${mtgSet}.svg`,
+          to:   `assets/images/sets/${mtgSet}.svg`
+        };
+      })
+    ),
+    new CopyWebpackPlugin(
+      mtg_sets.allAvailableSets.map(mtgSet => {
+        return {
           from: `assets/indexes/${config.descriptorIndexName}/${mtgSet}.json`,
           to:   `assets/indexes/${mtgSet}.json`
         };

@@ -119,7 +119,7 @@ In Chrome: Menu > More Tools > Extensions > Load unpacked > Select the `build/` 
 
 The extension should now be loaded and ready to use.
 
-After making changes to the code, repeat the steps to build and load the extension. If you have modified the feature descriptors used to identify images, you will need to re-run the indexing before building.
+After making changes to the code, re-build and then click the refresh button on the extensions page. If you have modified the feature descriptors used to identify images, you will need to re-run the indexing before building again.
 
 
 ## Test

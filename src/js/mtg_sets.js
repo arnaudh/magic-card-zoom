@@ -71,6 +71,10 @@ function getMtgSetName(code) {
     return setsDict[code].name;
 }
 
+function getMtgSetIconUrl(code) {
+    return setsDict[code].icon_svg_uri;
+}
+
 function findMtgStandardInText(text) {
     let textUpper = text.toUpperCase();
     for (const [code, set_info] of Object.entries(setsDict)) {
@@ -114,6 +118,7 @@ module.exports.expandSets = expandSets;
 module.exports.allAvailableSets = allAvailableSets;
 module.exports.allAvailableStandards = allAvailableStandards;
 module.exports.getMtgSetName = getMtgSetName;
+module.exports.getMtgSetIconUrl = getMtgSetIconUrl;
 module.exports.getStandardInfo = getStandardInfo;
 module.exports.findMtgStandardInText = findMtgStandardInText;
 

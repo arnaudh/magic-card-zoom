@@ -13,7 +13,7 @@ import sys
 import tempfile
 
 def card_id_to_url(card_id):
-    MTG_IMAGE_SERVER = "{}/assets/images/small/".format(dirname(dirname(abspath(__file__))))
+    MTG_IMAGE_SERVER = "{}/assets/images/cards/small/".format(dirname(dirname(abspath(__file__))))
     url = MTG_IMAGE_SERVER + card_id_to_jpg(card_id)
     return url
 

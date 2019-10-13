@@ -8,7 +8,8 @@ Promise.promisifyAll(fs);
 
 const LOCAL_CARDS_METADATA_DIR = 'assets/metadata/cards/full';
 const LOCAL_CARDS_DISPLAY_URLS_DIR = 'assets/metadata/cards/display_urls';
-const LOCAL_IMAGES_DIR = 'assets/images';
+const LOCAL_CARD_IMAGES_DIR = 'assets/images/cards';
+const LOCAL_SET_IMAGES_DIR = 'assets/images/sets';
 
 // For all image types, see https://scryfall.com/docs/api/images
 let INDEX_IMAGE_TYPE = 'small';
@@ -26,6 +27,7 @@ function downloadImagesAndMetadata() {
     let chain = Promise.resolve();
     for (let mtgSet of mtg_sets.allAvailableSets) {
         chain = chain
+            .then(() => downloadIconForSet(mtgSet, mtg_sets.getMtgSetIconUrl(mtgSet)))
             .then(() => downloadCardsMetadata(mtgSet))
             .then(() => downloadCardImagesForSet(mtgSet, INDEX_IMAGE_TYPE))
             .then(() => generateCardsDisplayUrlsForSet(mtgSet, DISPLAY_IMAGE_TYPE))
@@ -34,6 +36,18 @@ function downloadImagesAndMetadata() {
     return chain;
 }
 
+function downloadIconForSet(mtgSet, iconUrl) {
+    let chain = fs.mkdirsAsync(LOCAL_SET_IMAGES_DIR);
+    let localFilename = `${LOCAL_SET_IMAGES_DIR}/${mtgSet}.svg`;
+    if (checkAlreadyDownloaded(localFilename)) {
+        return;
+    } else {
+        chain = chain
+            .then(() => downloadFile(iconUrl, localFilename))
+            .then(() => Wait(WAIT_BETWEEN_REQUESTS_MILLIS));
+    }
+    return chain;
+}
 
 function downloadCardsMetadata(mtgSet) {
     let localFilename = `${LOCAL_CARDS_METADATA_DIR}/${mtgSet}.json`;
@@ -81,7 +95,7 @@ function generateCardsDisplayUrlsForSet(mtgSet, imageType) {
 
 function downloadImagesForItem(item, mtgSet, imageType) {
     let sides = getSidesIdAndUrl(item, imageType);
-    let localDir = `${LOCAL_IMAGES_DIR}/${imageType}/${mtgSet}`;
+    let localDir = `${LOCAL_CARD_IMAGES_DIR}/${imageType}/${mtgSet}`;
 
     let chain = fs.mkdirsAsync(localDir);
     for (const [sideId, imageUrl] of sides) {

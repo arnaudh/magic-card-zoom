@@ -226,7 +226,7 @@ class CvDebug {
         let keypoints_2 = matches.map(m => m.keypoint2);
         if (keypoints_1.length >= min_matches) {
             let img_keypoints = this.drawPoints(this.descriptor_input_img, keypoints_1);
-            let true_card_img = this.imread(`assets/images/orb-maxkeypoints200-cardheight70/cropped/${card_id}.png`);
+            let true_card_img = this.imread(`assets/images/cards/orb-maxkeypoints200-cardheight70/cropped/${card_id}.png`);
             // console.log(`drawAndSaveMatches ${card_id} [${true_card_img.cols}, ${true_card_img.rows}] kp1:`, keypoints_1);
             // console.log(`drawAndSaveMatches ${card_id} [${true_card_img.cols}, ${true_card_img.rows}] kp2:`, keypoints_2);
             let true_card_img_keypoints = this.drawPoints(true_card_img, keypoints_2);
@@ -238,7 +238,7 @@ class CvDebug {
 
     drawAndSaveContour(card_id, contour, filename) {
         let img_contour = this.drawContour(this.descriptor_input_img, contour);
-        let true_card_img = this.imread(`assets/images/orb-maxkeypoints200-cardheight70/cropped/${card_id}.png`);
+        let true_card_img = this.imread(`assets/images/cards/orb-maxkeypoints200-cardheight70/cropped/${card_id}.png`);
         let true_card_img_resized = this.resize(true_card_img, [null, img_contour.cols]);
         let img_combined = this.joinImages(img_contour, true_card_img_resized);
         this.imwrite(filename, img_combined);

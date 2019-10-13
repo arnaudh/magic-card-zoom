@@ -24,7 +24,7 @@ if (program.args.length > 0) {
 let descriptorName = program.descriptor || config.descriptorIndexName;
 let descriptor = descriptors.fromName(descriptorName);
 
-cvDebug = new CvDebug(`assets/images/${program.descriptor}`, false);
+cvDebug = new CvDebug(`assets/images/cards/${program.descriptor}`, false);
 
 if (typeof require != 'undefined' && require.main==module) {
     console.log(`Running image indexer on ${expanded_mtg_sets}`);
@@ -42,7 +42,7 @@ async function indexImages(mtgSet) {
     console.log(`Indexing ${mtgSet}`);
     fs.mkdirsSync(localDir);
 
-    fs.readdir(`assets/images/small/${mtgSet}/`)
+    fs.readdir(`assets/images/cards/small/${mtgSet}/`)
         .then(files => {
             // Filter out hidden files such as .DS_Store
             files = files.filter(item => ! /^\./.test(item));
@@ -51,7 +51,7 @@ async function indexImages(mtgSet) {
             var descriptionPromises = files.map(file => {
                 let [card_number, extension] = file.split('.');
                 let card_id = `${mtgSet}-${card_number}`;
-                return readAndDescribe(`assets/images/small/${mtgSet}/${file}`, card_id);
+                return readAndDescribe(`assets/images/cards/small/${mtgSet}/${file}`, card_id);
             });
             Promise.all(descriptionPromises)
             .then(results => {
