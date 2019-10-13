@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(
                 // HTML_string += '<form id="my-form"  onsubmit="return false;">'
                 var any_checked = false;
 
-                HTML_string += `<div>Please select the Standard set for the video:</div>`;
+                HTML_string += `<div>Please select the correct MtG format for the video:</div>`;
                 HTML_string += `<table class="greyGridTable">`;
                 HTML_string += `<tr>`;
                 HTML_string += `<th></th>`;
