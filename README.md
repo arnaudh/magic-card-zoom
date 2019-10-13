@@ -1,6 +1,6 @@
 # MagicCardZoom
 
-MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in YouTube videos.
+MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
 
 ![](src/img/capture1.gif)
 
@@ -8,24 +8,26 @@ The extension can be installed directly from the [Chrome Web Store](https://chro
 
 <!--- Detailed Description for the Web Store
 
+*** Version 2.0 ***
+You can now use MagicCardZoom on any video/stream on the web, including Twitch!
+
 === How to use ===
 1. install the extension
-2. go to a video from the Magic: the Gathering™ official channel (e.g. https://youtu.be/cKPaR2uSpPk?t=222)
+2. go to a video (e.g. https://youtu.be/cKPaR2uSpPk?t=222)
 3. click on the extension icon in the top right corner of the browser
-4. select the appropriate Standard pool of cards (best guess will be selected by default), then click on "Turn on"
+4. select the appropriate Standard pool of cards (best guess will be selected by default), then click on "Start MagicCardZoom"
 5. hover any card in the video to display a high definition view of the card
 
-To stop running the extension, click on the extension icon, then click on "Turn off". The extension will also stop when closing the tab or navigating to a new page.
+To stop running the extension, click on the extension icon, then click on "Stop MagicCardZoom". The extension will also stop when closing the tab or navigating to a new page.
 
 === Current limitations ===
-- Only videos from the official Magic: the Gathering™ YouTube channel are supported (https://www.youtube.com/channel/UC8ZGymAvfP97qJabgqUkz4A)
 - Only Standard and Draft tournament games are supported
 - Identification of the correct card depends on how recognisable the card's artwork is, therefore strong light reflection or obstructions (by e.g. dice or other cards) will cause cards to not be identified
 
 I am currently working on those limitations. Please check the extension page again for updates!
 
 === Feedback / contribute ===
-Please submit any feedback, issues, or feature requests you have here: https://github.com/arnaudh/magic-card-zoom/issues
+Please submit any feedback, issues, or feature requests you have here: https://github.com/arnaudh/magic-card-zoom/issues, or send an email to magiccardzoom@gmail.com
 Also, this extension is Open Source and you are more than welcome to contribute! https://github.com/arnaudh/magic-card-zoom
 
 === Disclaimer ===
