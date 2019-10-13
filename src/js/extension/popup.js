@@ -20,17 +20,26 @@ chrome.runtime.onMessage.addListener(
                     let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
                     let isSetReleasedBeforeVideo = new Date(Date.parse(lastSetReleasedAt)) < video_publish_date;
                     return isSetReleasedBeforeVideo
-                })
+                });
 
                 
                 // display form
-                let HTML_string = ''
+                let HTML_string = '';
                 // HTML_string += '<form id="my-form"  onsubmit="return false;">'
                 var any_checked = false;
 
-                HTML_string += `<table>`;
-                for (var i = 0; i < available_formats.length; i++) {
-                    var checked_string = '';
+                HTML_string += `<div>Please select the Standard set for the video:</div>`;
+                HTML_string += `<table class="greyGridTable">`;
+                HTML_string += `<tr>`;
+                HTML_string += `<th></th>`;
+                HTML_string += `<th>Standard</th>`;
+                HTML_string += `<th>Release date</th>`;
+                HTML_string += `<th>Sets included</th>`;
+                HTML_string += `</tr>`;
+                for (let i = 0; i < available_formats.length; i++) {
+                    let checked_string = '';
+                    let selected_string = '';
+                    let asterisk_string = '';
                     let legalSets = available_formats[i].info.sets;
                     let firstSetName = legalSets[0].name;
                     let lastSetName = legalSets[legalSets.length-1].name;
@@ -40,56 +49,74 @@ chrome.runtime.onMessage.addListener(
                     if (suggested_format !== null && suggested_format.value === available_formats[i].value) {
                         any_checked = true;
                         checked_string = 'checked';
-                        lastSetName = `<strong>${lastSetName}</strong>`;
+                        selected_string = 'selected';
                         isSuggestedBasedOnVideoTitle = true;
-                        lastSetReleasedAt = `<strong>${lastSetReleasedAt}</strong>`;
-                        lastSetName = `<strong>${lastSetName}</strong>`;
+                        asterisk_string += '*';
                     }
                     if (i === lastSetReleasedBeforeVideo) {
-                        // emphasize the last set released before the video was published
-                        lastSetReleasedAt = `<strong>${lastSetReleasedAt}</strong>`;
-                        lastSetName = `<strong>${lastSetName}</strong>`;
                         isSuggestedBasedOnVideoPublishedDate = true;
+                        asterisk_string += '*';
                     }
                     
                     if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
-                        HTML_string += `<tr class="tooltip">`;
+                        lastSetName = `<em>${lastSetName}</em>`;
+                        HTML_string += `<tr id="tr-${i}" class="tooltip ${selected_string}">`;
                         HTML_string += `<td>`;
                         HTML_string += `<span class="tooltiptext">`;
                         let hints = [];
                         if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
                         if (isSuggestedBasedOnVideoPublishedDate) { hints.push('publish date'); }
-                        HTML_string += `Guess based on the <br>video ${hints.join(' and ')}`;
+                        HTML_string += `Suggestion based on the <br>video ${hints.join(' and ')}`;
                         HTML_string += `</span>`;
                     } else {
-                        HTML_string += `<tr>`;
+                        HTML_string += `<tr id="tr-${i}">`;
                         HTML_string += `<td>`;
                     }
                     HTML_string += `<input type="radio" id="radio-${i}" name="mtg_format" value="${available_formats[i].value}" ${checked_string}>`;
                     HTML_string += `</td>`;
                     HTML_string += `<td>`;
-                    HTML_string += `<label for="radio-${i}">${lastSetName}</label>`;
+                    HTML_string += `${lastSetName}${asterisk_string}`;
                     HTML_string += `</td>`;
                     HTML_string += `<td>`;
-                    HTML_string += `<label for="radio-${i}">${lastSetReleasedAt}</label>`;
+                    HTML_string += `${lastSetReleasedAt}`;
+                    HTML_string += `</td>`;
+                    HTML_string += `<td>`;
+                    for (let mtgSet of legalSets) {
+                        HTML_string += `<img src="assets/images/sets/${mtgSet['code']}.svg" title="${mtgSet['name']}" class="mtg-set-icon">`;
+                    }
                     HTML_string += `</td>`;
                     HTML_string += `</tr>`;
+
                 }
                 HTML_string += `</table>`;
-                HTML_string += '<button id="my-button">Start MCZ!</button>';
-                // HTML_string += '</form>';
+                HTML_string += '<button id="my-button">Start MagicCardZoom</button>';
                 mainDiv.innerHTML = HTML_string;
 
                 let myButton = document.getElementById('my-button');
                 // disable submit until option selected
                 if (! any_checked) {
                     myButton.disabled = true;
-                    for (var i = 0; i < available_formats.length; i++) {
-                        document.getElementById(`radio-${i}`).onclick = function() {
+                }
+
+                for (var i = 0; i < available_formats.length; i++) {
+                    document.getElementById(`radio-${i}`).onclick = (function() { // Closure function to capture i correctly
+                        let j = i;
+                        return function() {
+                            for (var x = 0; x < available_formats.length; x++) {
+                                document.getElementById(`tr-${x}`).classList.remove("selected");
+                            }
+                            document.getElementById(`tr-${j}`).classList.add("selected");
                             myButton.disabled = false;
                             return true;
                         }
-                    }
+                    })();
+                    document.getElementById(`tr-${i}`).onclick = (function() { // Closure function to capture i correctly
+                        let j = i;
+                        return function() {
+                            document.getElementById(`radio-${j}`).click();
+                            return true;
+                        }
+                    })();
                 }
 
                 myButton.onclick = function() {
@@ -114,7 +141,7 @@ chrome.runtime.onMessage.addListener(
                 console.log('available action: turn OFF');
                 mainDiv.innerHTML = `
                 <form id="my-form">
-                        <button>Turn off MCZ</button>
+                        <button>Stop MagicCardZoom</button>
                 </form>
                 `;
 
