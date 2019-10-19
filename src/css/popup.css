@@ -86,3 +86,12 @@ button:disabled {
     background-color: #AAA;
     cursor: not-allowed;
 }
+
+a {
+    color: inherit;
+}
+
+#feedback-link {
+    position: absolute;
+    bottom: 7px;
+}

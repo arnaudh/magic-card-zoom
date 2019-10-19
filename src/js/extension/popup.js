@@ -90,7 +90,23 @@ chrome.runtime.onMessage.addListener(
                 }
                 HTML_string += `</table>`;
                 HTML_string += '<button id="my-button">Start MagicCardZoom</button>';
+                HTML_string += '<a id="feedback-link" href="https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link">Feedback?</a>';
+                
                 mainDiv.innerHTML = HTML_string;
+
+                // Make links work inside extension popup
+                // https://stackoverflow.com/questions/8915845/chrome-extension-open-a-link-from-popup-html-in-a-new-tab
+                var links = document.getElementsByTagName("a");
+                console.log('links', links);
+                for (var i = 0; i < links.length; i++) {
+                    (function () {
+                        var ln = links[i];
+                        var location = ln.href;
+                        ln.onclick = function () {
+                            chrome.tabs.create({active: true, url: location});
+                        };
+                    })();
+                }
 
                 let myButton = document.getElementById('my-button');
                 // disable submit until option selected
