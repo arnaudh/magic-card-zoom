@@ -2,18 +2,15 @@ const fs = require('fs-extra');
 const path = require('path');
 const requestPromise = require('request-promise');
 const cheerio = require('cheerio');
+const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
+
 
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
+const latestMtgSet = 'eld';
 const ignoreUnrecognizedSetNames = [
-    'exclusive cards',
-    // future sets
-    'Theros: Beyond Death',
-    'Ikoria: Lair of Behemoths',
-    'Ikoria: Land of Behemoths',
-    'Core Set 2021',
-    'Zendikar Rising'
+    'exclusive cards'
 ];
 
 function downloadStandardInfo() {
@@ -64,11 +61,15 @@ function downloadStandardInfo() {
 
                     let lastMtgSet = mtgSetsList[mtgSetsList.length - 1];
 
-                    if (mtgStandardDict[lastMtgSet] && !arraysEqual(mtgStandardDict[lastMtgSet], mtgSetsList) && !['fem', 'mir'].includes(lastMtgSet)) {
-                        throw Error(`Already have entry for ${lastMtgSet}`);
+                    if (mtgStandardDict[lastMtgSet] && !arraysEqual(mtgStandardDict[lastMtgSet], mtgSetsList) && !['fem', 'mir', 'eld'].includes(lastMtgSet)) {
+                        throw Error(`Already have entry for ${lastMtgSet}: ${mtgStandardDict[lastMtgSet]}`);
                     }
 
                     mtgStandardDict[lastMtgSet] = mtgSetsList;
+                    if (lastMtgSet == latestMtgSet) {
+                        console.log(`Reached latest known set ${latestMtgSet}, stopping here`);
+                        return false; // break .each()
+                    }
                 }
             });
 
@@ -100,11 +101,10 @@ let alternativeNames = {
     '8TH EDITION': 'EIGHTH EDITION',
     '9TH EDITION': 'NINTH EDITION',
     '10TH EDITION': 'TENTH EDITION',
+    'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED'
 }
 
 function mtgSetNameToCode(name) {
-    const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
-
     let namesToMatch = [name.toUpperCase()];
     let coreSetMatch = /M(20)?(\d{2})/.exec(name);
     if (coreSetMatch) {

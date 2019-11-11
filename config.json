@@ -25,7 +25,8 @@
     "standard-grn",
     "standard-rna",
     "standard-war",
-    "standard-m20"
+    "standard-m20",
+    "standard-eld"
   ],
   "includeTokens": true,
   "devMode": false
