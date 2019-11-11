@@ -26,6 +26,10 @@ class OpenCVJsWrapper {
         let transformArr = cvMatToArray(transform);
         let inliersArr = cvMatToArray(inliers);
 
+        cvMat1.delete();
+        cvMat2.delete();
+        inliers.delete();
+
         return {
             transform: transformArr,
             inliers: inliersArr,
@@ -35,8 +39,6 @@ class OpenCVJsWrapper {
 
     // Adapted from https://github.com/opencv/opencv/blob/master/samples/python/squares.py
     findRectangles(imageData, minContourLength = 150, minArea = 1000, maxArea = 50000) {
-        // let grayMat = arrayToCvMat(grayMatInput, opencvjs.CV_8U);
-
         let cvMat = opencvjs.matFromImageData(imageData);
         let grayMat = new opencvjs.Mat();
         opencvjs.cvtColor(cvMat, grayMat, opencvjs.COLOR_RGBA2GRAY, 0);
@@ -52,6 +54,8 @@ class OpenCVJsWrapper {
                 opencvjs.Canny(grayMat, edgesMat, 0, 50, 5);
                 let kernel = new opencvjs.Mat({ width: 0, height: 0 }, opencvjs.CV_8U);
                 opencvjs.dilate(edgesMat, thresholdedMat, kernel);
+                edgesMat.delete();
+                kernel.delete();
             } else {
                 opencvjs.threshold(grayMat, thresholdedMat, threshold, 255, opencvjs.THRESH_BINARY);
             }
@@ -60,14 +64,17 @@ class OpenCVJsWrapper {
             let otherThing = new opencvjs.Mat();
             opencvjs.findContours(thresholdedMat, contours, otherThing, opencvjs.RETR_LIST, opencvjs.CHAIN_APPROX_SIMPLE, new opencvjs.Point());
             
-            for (var c = 0; c < contours.size(); c++) {
-                let contour = contours.get(c);
-                let contourLength = opencvjs.arcLength(contours.get(c), true);
+            for (let c = 0; c < contours.size(); c++) {
+                let contour = contours.get(c); // this creates a new object which needs to be deleted
+                let contourLength   = opencvjs.arcLength(contour, true);
                 if (contourLength < minContourLength) {
+                    contour.delete();
                     continue;
                 }
                 let approximatedContour = new opencvjs.Mat();
                 opencvjs.approxPolyDP(contour, approximatedContour, 0.02*contourLength, true);
+                contour.delete();
+
                 let numCorners = approximatedContour.size().height;
                 
                 if (numCorners === 4) {
@@ -89,14 +96,14 @@ class OpenCVJsWrapper {
                         }
                     }
                 }
-                // approximatedContour.delete();
+                approximatedContour.delete();
             }
-            // contours.delete();
-            // otherThing.delete();
+            contours.delete();
+            otherThing.delete();
         }
-        // cvMat.delete();
-        // grayMat.delete();
-        // thresholdedMat.delete();
+        cvMat.delete();
+        grayMat.delete();
+        thresholdedMat.delete();
         return rectangles;
     }
 }
@@ -187,9 +194,9 @@ function cvMatToArray(mat) {
     if (mat.type() === opencvjs.CV_32SC2) {
         size.width = 2; // because we have 2 channels
     }
-    for (var i = 0; i < size.height; i++) {
+    for (let i = 0; i < size.height; i++) {
         let row = [];
-        for (var j = 0; j < size.width; j++) {
+        for (let j = 0; j < size.width; j++) {
             let value;
             switch (mat.type()) {
                 case opencvjs.CV_8U:   value = mat.ucharAt(i,j);  break;
@@ -240,7 +247,7 @@ opencvjs['onRuntimeInitialized']=()=>{
 
 // simple timer class
 function Timer() {
-  var start = null;
+  let start = null;
   this.reset = function () {
     start = (new Date()).getTime();
   };
