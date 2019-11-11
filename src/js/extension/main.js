@@ -17,6 +17,7 @@ var popupImage;
 var loadingPopup;
 var loadingPopupImage;
 var parentOfPopup;
+var body;
 
 var mousePosition = null;
 var lastMouseLoopPosition = null;
@@ -42,7 +43,7 @@ var lastMessageSent = null;
 var checkMouseLoopInterval;
 var readyStateCheckInterval = setInterval(function() {
   console.log('[MCZ main.js] Checking if there is a video...');
-  var body = document.getElementsByTagName('body')[0];
+  body = document.getElementsByTagName('body')[0];
   var videos = document.getElementsByTagName('video');
   if (videos.length > 0) {
     clearInterval(readyStateCheckInterval);
@@ -112,7 +113,23 @@ function addKeyListener() {
   };
 }
 
+function movePopupAndLoadingIfNecessary() {
+  // if in fullscreen, make sure popup is under the fullscreen element
+  if (document.fullscreenElement && popup.parentElement != document.fullscreenElement) {
+    console.log('moving popup & loading under fullscreen element');
+    document.fullscreenElement.appendChild(popup);
+    document.fullscreenElement.appendChild(loadingPopup);
+  }
+  // if not in fullscreen, make sure popup is under the body
+  if (!document.fullscreenElement && popup.parentElement != body) {
+    console.log('moving popup & loading under body');
+    body.appendChild(popup);
+    body.appendChild(loadingPopup);
+  }
+}
+
 function checkMouseLoop() {
+  movePopupAndLoadingIfNecessary();
   if (
     mousePosition == lastMouseLoopPosition
     && +new Date() > +lastMove + MOUSE_STOP_AND_IDENTIFY_DELAY
