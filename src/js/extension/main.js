@@ -240,11 +240,9 @@ function mymousemove(evt){
   const x = evt.clientX;
   const y = evt.clientY;
 
-// TODO read from css class
-  const cardWidth = 312;
-  const cardHeight = 445;
-
-  const loadingWidth = 50;
+  const cardWidth = popupImage.width;
+  const cardHeight = popupImage.height;
+  const loadingWidth = parseFloat(window.getComputedStyle(loadingPopup).width);
 
   // Show the loading & card on the right if the card fits on the right, else on the left
   // Always show card in full view
