@@ -107,8 +107,13 @@ function unique(arr) {
     return [...new Set(arr)];
 }
 
+const concat = (x,y) =>
+  x.concat(y)
+const flatMap = (f,xs) =>
+  xs.map(f).reduce(concat, [])
+
 let training_formats = unique(trainingItems.map(i => i.mtg_format));
-let training_mtg_sets = unique(trainingItems.flatMap(i => mtg_sets.expandSets(i.mtg_format)));
+let training_mtg_sets = unique(flatMap(i => mtg_sets.expandSets(i.mtg_format), trainingItems));
 
 let indexes = {};
 for (var mtg_set of training_mtg_sets) {
@@ -161,8 +166,10 @@ function doTest(cvwrapper) {
                 cvDebug.true_card_id = true_card_id;
             }
 
+            let previousMatches = [];
+
             return identify_services[mtg_format]
-                .identifyMultiScales(originalImageData, potentialCardHeights, cvDebug)
+                .identifyMultiScales(originalImageData, potentialCardHeights, previousMatches, cvDebug)
                 .then(result => {
                     let {matches: matches, time: time} = result;
                     let card_identified;

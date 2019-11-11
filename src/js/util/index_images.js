@@ -24,7 +24,7 @@ if (program.args.length > 0) {
 let descriptorName = program.descriptor || config.descriptorIndexName;
 let descriptor = descriptors.fromName(descriptorName);
 
-cvDebug = new CvDebug(`assets/images/cards/${program.descriptor}`, false);
+cvDebug = new CvDebug(`assets/images/cards/${descriptor.name}`, false);
 
 if (typeof require != 'undefined' && require.main==module) {
     console.log(`Running image indexer on ${expanded_mtg_sets}`);

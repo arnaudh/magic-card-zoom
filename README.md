@@ -27,7 +27,7 @@ To stop running the extension, click on the extension icon, then click on "Stop 
 I am currently working on those limitations. Please check the extension page again for updates!
 
 === Feedback / contribute ===
-Please submit any feedback, issues, or feature requests you have here: https://github.com/arnaudh/magic-card-zoom/issues, or send an email to magiccardzoom@gmail.com
+Please submit any feedback, questions or issues you have to magiccardzoom@gmail.com, or use the feedback link in the extension popup.
 Also, this extension is Open Source and you are more than welcome to contribute! https://github.com/arnaudh/magic-card-zoom
 
 === Disclaimer ===
@@ -37,8 +37,7 @@ MagicCardZoom is unofficial Fan Content permitted under the Fan Content Policy. 
 
 ## Contributing
 
-Please submit any feedback, issues, or feature requests you have [here](https://github.com/arnaudh/magic-card-zoom/issues).
-
+Please submit any feedback, issues, or feature requests you have [here](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link).
 
 Also, you are more than welcome to contribute directly to this repository!
 To do so, fork it, hack away and submit a pull request.
