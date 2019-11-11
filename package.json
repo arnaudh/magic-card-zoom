@@ -34,7 +34,7 @@
     "get-pixels": "^3.3.2",
     "loglevel": "^1.6.1",
     "mathjs": "^5.5.0",
-    "opencv4nodejs": "^5.1.0",
+    "opencv4nodejs": "^4.9.0",
     "puppeteer": "^1.13.0",
     "read-yaml": "^1.1.0",
     "request": "^2.88.0",
