@@ -216,19 +216,23 @@ function identifyCard(message, tab, sendResponse) {
   const potentialCardHeights = [];
   const cropLength = 200;
 
+  let timer = new Timer();
+
   lastVideoHeight = videoHeight;
   chrome.tabs.captureVisibleTab(
     tab.windowId,
     {format: "jpeg"},
     function(dataUrl) {
+      timer.top('captureVisibleTab');
       if (checkMessageOutdated(message.messageID, 'after captureVisibleTab')) return;
       cropImage2(
         dataUrl,
         {'x':videoX, 'y':videoY, 'width':videoWidth, 'height':videoHeight}, 
         {'x':clientX-cropLength/2, 'y':clientY-cropLength/2, 'width':cropLength, 'height':cropLength},
         function(imageData1, imageData2){
+          timer.top('cropImage2');
           if (checkMessageOutdated(message.messageID, 'after cropImage')) return;
-          identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, message.messageID, tab.id, sendResponse);
+          identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, message.messageID, tab.id, sendResponse, timer);
         }
       );
 
@@ -237,6 +241,22 @@ function identifyCard(message, tab, sendResponse) {
 
   return true; // so that the sender knows the response is asynchronous
 }
+
+
+// simple timer class
+function Timer() {
+  this.times = [];
+  let previousTime = (new Date()).getTime();
+  this.top = function(stepName) {
+    this.times.push({
+      stepName: stepName,
+      time: (new Date()).getTime() - previousTime
+    })
+  }
+  this.logTimes = function() {
+    console.log(this.times.map(t => `[TIMER] ${t.stepName}: ${t.time} ms`).join(', '));
+  }
+};
 
 function cropImage(dataUrl, cropLocation, cropSize, callback) {
   let sourceImage = new Image();
@@ -299,10 +319,12 @@ function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
   sourceImage.src = dataUrl;
 }
 
-function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse) {
+function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse, timer) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
   mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights)
     .then(results => {
+      timer.top('identify');
+      timer.logTimes();
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];
       let response;
