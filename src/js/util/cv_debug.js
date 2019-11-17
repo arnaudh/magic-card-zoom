@@ -167,16 +167,28 @@ class CvDebug {
     }
 
     drawContour(img_original, contour) {
+        return this.drawContours(img_original, [contour]);
+    }
+
+    drawContours(img_original, contours) {
         var img = img_original.copy();
 
-        let points2 = [];
-        for (const point of contour) {
-            let vec = new cv.Point2(point[0], point[1]);
-            points2.push(vec);
-        }
-        let contourCv = new cv.Contour(points2);
+        let contoursCv = [];
         let color =  new cv.Vec(255, 0, 255);
-        img.drawContours([contourCv], color);
+        for (const contour of contours) {
+            let points2 = [];
+            for (const point of contour) {
+                console.log('point' ,point);
+                let vec = new cv.Point2(point[0], point[1]);
+                points2.push(vec);
+            }
+            console.log('points2', points2);
+            let contourCv = new cv.Contour(points2);
+            contoursCv.push(contourCv);
+            img.drawContours([contourCv], color);
+        }
+        console.log('contoursCv', contoursCv);
+        // img.drawContours(contoursCv, color);
         return img;
     }
 

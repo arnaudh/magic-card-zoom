@@ -128,6 +128,31 @@ function movePopupAndLoadingIfNecessary() {
   }
 }
 
+// simple timer class
+// can pass timer as input, so we can pass it through chrome.runtime.sendMessage, and create a new one on reception
+// (chrome.runtime.sendMessage can only pass JSON around, not objects with state/functions)
+function Timer(timer) {
+  // console.log(`new Timer(${timer})`);
+  if (timer) {
+    this.times = Array.from(timer.times);
+    this.previousTime = timer.previousTime;
+  } else {
+    this.times = [];
+    this.previousTime = (new Date()).getTime();
+  }
+  this.top = function(stepName) {
+    let newTime = (new Date()).getTime();
+    this.times.push({
+      stepName: stepName,
+      time: newTime - this.previousTime
+    });
+    this.previousTime = newTime;
+  }
+  this.logTimes = function() {
+    console.log(this.times.map(t => `[TIMER] ${t.stepName}: ${t.time} ms`).join('\n'));
+  }
+};
+
 function checkMouseLoop() {
   movePopupAndLoadingIfNecessary();
   if (
@@ -139,6 +164,9 @@ function checkMouseLoop() {
     lastMouseStopToIdentifyPosition = mousePosition;
     // from there on, we shouldn't ask to identify unless we move again
     mouse_stopped_to_identify = true;
+    let timer = new Timer();
+
+
 
     let data = {
       mousePosition: mousePosition,
@@ -147,7 +175,8 @@ function checkMouseLoop() {
       page: {
         title: document.title,
         channelID: channelID
-      }
+      },
+      timer: timer
     };
     sendChromeMessage('mouseMovedOverVideo', data, handleResponseFromBackground);
     showLoadingGif();
@@ -193,6 +222,7 @@ function handleResponseFromBackground(response) {
         alert(response.message);
         break;
       case 'success':
+        let timer = new Timer(response.timer);
         identifyRequestId = response.identify_request_id;
         console.log('CARD', response.card)
         if (response.card) {
@@ -200,6 +230,8 @@ function handleResponseFromBackground(response) {
         } else {
           hidePopupAndLoadingGif()
         }
+        timer.top('show/hide Card')
+        timer.logTimes();
         break;
     }
   }
@@ -273,13 +305,11 @@ function mouseOverVideo(m) {
 }
 
 function hidePopupAndLoadingGif() {
-  console.log('hide popup');
   popup.style.visibility = "hidden";
   loadingPopup.style.visibility = "hidden";
 }
 
 function removePopupAndLoadingGif() {
-  console.log('remove popup');
   popup.parentNode.removeChild(popup);
   loadingPopup.parentNode.removeChild(loadingPopup);
 }
@@ -295,7 +325,6 @@ function showCard(card_url) {
 
 function showLoadingGif() {
   loadingPopup.style.visibility = "visible";
-  // console.log('GIF popup', loadingPopup);
 }
 
 

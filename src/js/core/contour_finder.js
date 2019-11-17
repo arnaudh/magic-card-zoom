@@ -9,11 +9,16 @@ class ContourFinder {
         this.cvwrapper = cvwrapper;
     }
 
-    getPotentialCardHeights(imageData) {
+    getPotentialCardHeights(imageData, cvDebug = null) {
         let rectangles = this.cvwrapper.findRectangles(imageData);
         console.log('rectangles', rectangles);
         let rectanglesNotOnBorder = discardRectanglesOnBorderOfImage(rectangles, [imageData.width, imageData.height]);
         let rectanglesMtgRatio = rectanglesNotOnBorder.filter(hasMtgRatio);
+        if (cvDebug) {
+            cvDebug.imwrite('rectangles.png', cvDebug.drawContours(cvDebug.fromImageData(imageData), rectangles));
+            cvDebug.imwrite('rectangles_not_on_border.png', cvDebug.drawContours(cvDebug.fromImageData(imageData), rectanglesNotOnBorder));
+            cvDebug.imwrite('rectangles_mtg_ratio.png', cvDebug.drawContours(cvDebug.fromImageData(imageData), rectanglesMtgRatio));
+        }
         
         let rectangleLengths = rectanglesMtgRatio.map(getRectangleLength);
         console.log('rectangleLengths', rectangleLengths);

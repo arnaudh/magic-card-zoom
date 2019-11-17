@@ -14,19 +14,18 @@ class IdentifySession {
         this.contourFinder = new ContourFinder(cvwrapper);
     }
     
-    async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, cv_debug = null) {
+    async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, timer, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
             previousMatchCardHeights = this.previousMatches.slice(-1).map(matches => matches[0].cardHeightRatio * videoImageData.height);
         }
-        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData);
+        let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData, cv_debug);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
         potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
         console.log('|previousMatchCardHeights', previousMatchCardHeights);
         console.log('|estimatedPotentialCardHeights', estimatedPotentialCardHeights);
         console.log('|defaultPotentialCardHeights', defaultPotentialCardHeights);
         console.log('|=> potentialCardHeights', potentialCardHeights);
-        const timer = new Timer();
         let matches = [];
 
         let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches);
@@ -41,10 +40,9 @@ class IdentifySession {
                 }
             }
         }
-        console.log("identify() DONE in " + timer.get() + " ms.");
+        timer.top('IdentifySession.identify');
         return {
-            matches: matches,
-            time: timer.get()
+            matches: matches
         }
     }
 }

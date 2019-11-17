@@ -91,7 +91,6 @@ class OrbDescriptor {
         }
         
         if (cvDebug) {
-            console.log('NOT CV DEBUGGING');
             var original_img = cvDebug.fromImageData(imageData);
             var img_with_points = cvDebug.drawPoints(original_img, keypoints);
             cvDebug.imwrite('points.png', img_with_points);

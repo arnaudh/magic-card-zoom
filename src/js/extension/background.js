@@ -1,3 +1,6 @@
+var manifestData = chrome.runtime.getManifest();
+console.log(`${manifestData.name} version ${manifestData.version}`);
+
 console.log('background.js');
 
 // any image needed by the extension needs to be imported here
@@ -197,6 +200,9 @@ function stopTabRecording(tabId) {
 }
 
 function identifyCard(message, tab, sendResponse) {
+  let timer = new Timer(message.data.timer);
+  console.log('timer', timer);
+  timer.top('enter identifyCard')
   if (checkMessageOutdated(message.messageID, 'identifyCard')) return;
   
   const devicePixelRatio = message.data.devicePixelRatio;
@@ -215,8 +221,6 @@ function identifyCard(message, tab, sendResponse) {
 
   const potentialCardHeights = [];
   const cropLength = 200;
-
-  let timer = new Timer();
 
   lastVideoHeight = videoHeight;
   chrome.tabs.captureVisibleTab(
@@ -242,19 +246,28 @@ function identifyCard(message, tab, sendResponse) {
   return true; // so that the sender knows the response is asynchronous
 }
 
-
 // simple timer class
-function Timer() {
-  this.times = [];
-  let previousTime = (new Date()).getTime();
+// can pass timer as input, so we can pass it through chrome.runtime.sendMessage, and create a new one on reception
+// (chrome.runtime.sendMessage can only pass JSON around, not objects with state/functions)
+function Timer(timer) {
+  // console.log(`new Timer(${timer})`);
+  if (timer) {
+    this.times = Array.from(timer.times);
+    this.previousTime = timer.previousTime;
+  } else {
+    this.times = [];
+    this.previousTime = (new Date()).getTime();
+  }
   this.top = function(stepName) {
+    let newTime = (new Date()).getTime();
     this.times.push({
       stepName: stepName,
-      time: (new Date()).getTime() - previousTime
-    })
+      time: newTime - this.previousTime
+    });
+    this.previousTime = newTime;
   }
   this.logTimes = function() {
-    console.log(this.times.map(t => `[TIMER] ${t.stepName}: ${t.time} ms`).join(', '));
+    console.log(this.times.map(t => `[TIMER] ${t.stepName}: ${t.time} ms`).join('\n'));
   }
 };
 
@@ -321,10 +334,8 @@ function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
 
 function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse, timer) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
-  mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights)
+  mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer)
     .then(results => {
-      timer.top('identify');
-      timer.logTimes();
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];
       let response;
@@ -338,7 +349,8 @@ function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights
             image_url: DisplayService.getDisplayUrl(card_id)
           },
           status: 'success',
-          messageID: messageID
+          messageID: messageID,
+          timer: timer
         }
       } else {
         lastCardId = null;
@@ -346,6 +358,7 @@ function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights
           card: null,
           status: 'success',
           messageID: messageID,
+          timer: timer
         };
       }
       console.log(`<=== sendResponse [${messageID}]`, response);
