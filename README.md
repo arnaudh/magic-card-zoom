@@ -147,10 +147,11 @@ The dataset and benchmark script can be found under [test/benchmark/](test/bench
 
 ## Aknowledgements
 
+- [Scryfall](https://scryfall.com/): comprehensive search engine and API for _Magic: the Gathering™_ cards
 - [jsfeat](https://github.com/inspirit/jsfeat): JavaScript computer vision library
 - [OpenCV](https://github.com/opencv/opencv): open source computer vision library with C++, Python and Java interfaces
-- [emscripten](https://emscripten.org/): toolchain for compiling C/C++ to asm.js and WebAssembly
 - [opencv4nodejs](https://github.com/justadudewhohacks/opencv4nodejs): OpenCV bindings for NodeJS
+- [emscripten](https://emscripten.org/): toolchain for compiling C/C++ to asm.js and WebAssembly
 - [ORB](http://www.willowgarage.com/sites/default/files/orb_final.pdf): fast rotation-invariant feature descriptor
 - [PyImageSearch](http://www.pyimagesearch.com/): computer vision tutorials in Python using OpenCV
 
