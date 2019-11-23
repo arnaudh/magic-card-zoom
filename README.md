@@ -4,6 +4,8 @@ MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards
 
 ![](src/img/capture1.gif)
 
+## Installation
+
 The extension can be installed directly from the [Chrome Web Store](https://chrome.google.com/webstore/detail/magic-card-zoom/cphkchmjhpgjajfogfkolbgageciokda).
 
 <!--- Detailed Description for the Web Store
@@ -35,12 +37,16 @@ MagicCardZoom is unofficial Fan Content permitted under the Fan Content Policy. 
 
 -->
 
+## How does it work?
+
+See [this page](./doc/How_it_works.md) for an explanation of how it works.
+
 ## Contributing
 
 Please submit any feedback, issues, or feature requests you have [here](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link).
 
 Also, you are more than welcome to contribute directly to this repository!
-To do so, fork it, hack away and submit a pull request.
+To do so, fork it, make some changes and submit a pull request.
 
 ## Setup
 
