@@ -5,6 +5,8 @@ MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards
 
 The way it works is by using a feature descriptor to detect points of interests (keypoints) from the video, and to match them to keypoints of cards coming from a pre-selected pool of cards.
 
+<br/>
+
 ![](How_it_works.png)
 
 ### A) Create index
