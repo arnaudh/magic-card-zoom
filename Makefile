@@ -1,6 +1,6 @@
 .PHONY: test
 
-ALL_SOURCES_AND_ASSETS := $(shell find src/ assets/metadata/ assets/indexes/)
+ALL_SOURCES_AND_ASSETS := $(shell find src/ assets/metadata/ assets/indexes/ config.json)
 GIT_SHA := $(shell git rev-parse --short HEAD)
 
 download-images-and-metadata:

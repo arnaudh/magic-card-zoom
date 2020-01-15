@@ -8,7 +8,7 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'eld';
+const latestMtgSet = 'thb';
 const ignoreUnrecognizedSetNames = [
     'exclusive cards'
 ];
@@ -39,6 +39,7 @@ function downloadStandardInfo() {
                 if (tds.length == 6) {
                     let mtgSetsList = [];
                     let setsDirty = $(tds[2]).textln().split('\n');
+                    // console.log('setsDirty', setsDirty);
 
                     for (var mtgSet of setsDirty) {
                         mtgSet = mtgSet.trim();
@@ -105,7 +106,10 @@ let alternativeNames = {
 }
 
 function mtgSetNameToCode(name) {
-    let namesToMatch = [name.toUpperCase()];
+    let namesToMatch = [
+        name.toUpperCase(),
+        name.toUpperCase().replace(/:/, '')
+    ];
     let coreSetMatch = /M(20)?(\d{2})/.exec(name);
     if (coreSetMatch) {
         let code = coreSetMatch[2];

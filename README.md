@@ -128,6 +128,30 @@ The extension should now be loaded and ready to use.
 
 After making changes to the code, re-build and then click the refresh button on the extensions page. If you have modified the feature descriptors used to identify images, you will need to re-run the indexing before building again.
 
+### Adding a new _Magic: the Gathering™_ set
+
+The following steps need to be done whenever a new set is released.
+
+1. Check if there is a new set available on Scryfall: https://scryfall.com/sets
+
+2. Edit download_standard_info.js to specify the latest set code:
+
+```
+const latestMtgSet = 'thb';
+```
+
+3. Edit standard.json to add the latest standard:
+
+```
+  "availableStandards": [
+    ...,
+    "standard-thb"
+  ],
+```
+
+4. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.) 
+
+5. Release the new version of the extension on the Webstore
 
 ## Test
 
