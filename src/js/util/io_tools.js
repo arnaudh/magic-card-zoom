@@ -13,8 +13,13 @@ function writePrettyJsonToFile(json, filename) {
 
 function readJsonAsync(filename) {
     return fs.readFileAsync(filename)
-        .then(JSON.parse)
+        .then(JSON.parse);
+}
+
+function readJsonSync(filename) {
+    return JSON.parse(fs.readFileSync(filename));
 }
 
 module.exports.writePrettyJsonToFile = writePrettyJsonToFile;
 module.exports.readJsonAsync = readJsonAsync;
+module.exports.readJsonSync = readJsonSync;

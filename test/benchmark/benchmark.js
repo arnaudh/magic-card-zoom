@@ -8,6 +8,7 @@ const path = require('path');
 const readYaml = require('read-yaml');
 const program = require('commander');
 const clustering = require('density-clustering');
+const duplicateIllustrations = require('../../assets/metadata/cards/duplicate_illustrations.json');
 
 program
     .option('-d, --descriptor [name]', 'Which index descriptor to use [eg orb-maxkeypoints200]')
@@ -178,7 +179,7 @@ function doTest(cvwrapper) {
                     } else {
                         card_identified = null;
                     }
-                    let is_match = (card_identified === true_card_id);
+                    let is_match = isMatch(card_identified, true_card_id);
                     return {
                         item: item,
                         card_identified: card_identified,
@@ -228,6 +229,15 @@ require('../../src/js/core/opencvjs_wrapper.js').initialize(doTest);
 function logAndAppendToFile(file, str) {
     console.log(str);
     fs.appendFileSync(file, str+'\n');
+}
+
+function isMatch(detected_card_id, true_card_id) {
+    if (detected_card_id === true_card_id) {
+        return true;
+    } else {
+        let identicalIllustrationId = Object.entries(duplicateIllustrations).some(([k,v]) => v.includes(detected_card_id) && v.includes(true_card_id));
+        return identicalIllustrationId;
+    }
 }
 
 

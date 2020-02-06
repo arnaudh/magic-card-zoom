@@ -11,6 +11,8 @@ const LOCAL_CARDS_DISPLAY_URLS_DIR = 'assets/metadata/cards/display_urls';
 const LOCAL_CARD_IMAGES_DIR = 'assets/images/cards';
 const LOCAL_SET_IMAGES_DIR = 'assets/images/sets';
 
+const generateDuplicateIllustrationsDictionnary = require('./find_duplicate_illustrations.js');
+
 // For all image types, see https://scryfall.com/docs/api/images
 let INDEX_IMAGE_TYPE = 'small';
 let DISPLAY_IMAGE_TYPE = 'normal';
@@ -32,6 +34,7 @@ function downloadImagesAndMetadata() {
             .then(() => downloadCardImagesForSet(mtgSet, INDEX_IMAGE_TYPE))
             .then(() => generateCardsDisplayUrlsForSet(mtgSet, DISPLAY_IMAGE_TYPE))
     }
+    chain = chain.then(generateDuplicateIllustrationsDictionnary);
     chain.then(() => console.log(`Download images and metadata from ${mtg_sets.allAvailableSets.length} sets DONE\n`));
     return chain;
 }
@@ -111,7 +114,7 @@ function downloadImagesForItem(item, mtgSet, imageType) {
     return chain;
 }
 
-// Note: beware of special case collector_number == "250a"
+// Note: beware of special case collector numbers "250a", also "S2" (https://scryfall.com/card/8ed/S2/vengeance)
 // eg: https://scryfall.com/search?q=cn%3A250a&unique=cards&as=grid&order=name
 function getSidesIdAndUrl(item, imageType) {
     let imageUrls;
