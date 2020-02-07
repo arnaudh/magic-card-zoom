@@ -12,6 +12,7 @@ const LOCAL_CARD_IMAGES_DIR = 'assets/images/cards';
 const LOCAL_SET_IMAGES_DIR = 'assets/images/sets';
 
 const generateDuplicateIllustrationsDictionnary = require('./find_duplicate_illustrations.js');
+const generateBasicLandsArray = require('./find_basic_lands.js');
 
 // For all image types, see https://scryfall.com/docs/api/images
 let INDEX_IMAGE_TYPE = 'small';
@@ -34,7 +35,9 @@ function downloadImagesAndMetadata() {
             .then(() => downloadCardImagesForSet(mtgSet, INDEX_IMAGE_TYPE))
             .then(() => generateCardsDisplayUrlsForSet(mtgSet, DISPLAY_IMAGE_TYPE))
     }
-    chain = chain.then(generateDuplicateIllustrationsDictionnary);
+    chain = chain
+        .then(generateDuplicateIllustrationsDictionnary)
+        .then(generateBasicLandsArray);
     chain.then(() => console.log(`Download images and metadata from ${mtg_sets.allAvailableSets.length} sets DONE\n`));
     return chain;
 }
