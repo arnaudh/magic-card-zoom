@@ -54,25 +54,28 @@ var options = {
     ]),
     new CopyWebpackPlugin(
       mtg_sets.allAvailableSets.map(mtgSet => {
+        let sanitizedMtgSet = mtgSet === 'con' ? '_con' : mtgSet; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
         return {
           from: `assets/images/sets/${mtgSet}.svg`,
-          to:   `assets/images/sets/${mtgSet}.svg`
+          to:   `assets/images/sets/${sanitizedMtgSet}.svg`
         };
       })
     ),
     new CopyWebpackPlugin(
       mtg_sets.allAvailableSets.map(mtgSet => {
+        let sanitizedMtgSet = mtgSet === 'con' ? '_con' : mtgSet; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
         return {
           from: `assets/indexes/${config.descriptorIndexName}/${mtgSet}.json`,
-          to:   `assets/indexes/${mtgSet}.json`
+          to:   `assets/indexes/${sanitizedMtgSet}.json`
         };
       })
     ),
     new CopyWebpackPlugin(
       mtg_sets.allAvailableSets.map(mtgSet => {
+        let sanitizedMtgSet = mtgSet === 'con' ? '_con' : mtgSet; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
         return {
           from: `assets/metadata/cards/display_urls/${mtgSet}.json`,
-          to:   `assets/metadata/cards/display_urls/${mtgSet}.json`
+          to:   `assets/metadata/cards/display_urls/${sanitizedMtgSet}.json`
         };
       })
     ),

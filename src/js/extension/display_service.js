@@ -3,7 +3,10 @@ const mtg_sets = require('../mtg_sets.js');
 
 let urlsDict;
 
-Promise.all(mtg_sets.allAvailableSets.map(s => fetch(`assets/metadata/cards/display_urls/${s}.json`)))
+Promise.all(mtg_sets.allAvailableSets.map(s => {
+        let sanitizedSet = s === 'con' ? '_con' : s; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
+        return fetch(`assets/metadata/cards/display_urls/${sanitizedSet}.json`);
+    }))
     .then(responses => {
         let jsons = Promise.all(responses.map(r => r.json()));
         return jsons.then(jj => {

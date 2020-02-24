@@ -82,7 +82,8 @@ chrome.runtime.onMessage.addListener(
                     HTML_string += `</td>`;
                     HTML_string += `<td>`;
                     for (let mtgSet of legalSets) {
-                        HTML_string += `<img src="assets/images/sets/${mtgSet['code']}.svg" title="${mtgSet['name']}" class="mtg-set-icon">`;
+                        let mtgSetCodeSanitized = mtgSet['code'] === 'con' ? '_con' : mtgSet['code']; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
+                        HTML_string += `<img src="assets/images/sets/${mtgSetCodeSanitized}.svg" title="${mtgSet['name']}" class="mtg-set-icon">`;
                     }
                     HTML_string += `</td>`;
                     HTML_string += `</tr>`;
