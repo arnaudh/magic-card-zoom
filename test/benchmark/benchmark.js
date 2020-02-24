@@ -1,3 +1,4 @@
+const basicLands = require("../../assets/metadata/cards/basic_lands.json");
 const ContourFinder = require('../../src/js/core/contour_finder.js');
 const IdentifyService = require('../../src/js/core/identify_service.js');
 const CvDebug = require('../../src/js/util/cv_debug.js');
@@ -16,9 +17,11 @@ program
     .option('-c, --cvdebug', 'Write debug images to disk')
     .option('-q, --quiet', 'Reduce noise')
     .option('-t, --tag [tag]', 'Tag to filter training items by [eg fantom]')
-    .option('-n, --item_numbers [tag]', 'Which specific dataset items to run [eg "10 12 60"]')
+    .option('-n, --item_numbers [numbers]', 'Which specific dataset items to run [eg "10,12,60"]')
     .option('-l, --limit [limit]', 'limit number of training items [eg 1]')
     .parse(process.argv);
+
+let includeBasicLands = true;
 
 youtubeVideoFormats = {
   "sQk7RSUgsA4": "standard-akh",
@@ -127,6 +130,13 @@ function average(arr) {
     return arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 }
 
+
+function filterDict(dict, filter) {
+    // example: filterDict({'a':1,'b':1,'c':1}, ([k,v]) => ['a','c'].includes(k)))
+    Object.fromEntries = arr => Object.assign({}, ...Array.from(arr, ([k, v]) => ({[k]: v}) ));
+    return Object.fromEntries(Object.entries(dict).filter(filter));
+}
+
 function doTest(cvwrapper) {
     console.log('doTest');
     let identify_services = {}
@@ -134,6 +144,12 @@ function doTest(cvwrapper) {
         let index = {};
         for (var mtg_set of mtg_sets.expandSets(mtg_format)) {
             index = {...index, ...indexes[mtg_set]};
+        }
+        if (!includeBasicLands) {
+            let lengthBefore = Object.keys(index).length;
+            index = filterDict(index, ([k,v]) => !basicLands.includes(k));
+            let lengthAfter = Object.keys(index).length;
+            console.log(`Removing basic lands: drops the number of cards from ${lengthBefore} to ${lengthAfter}`);
         }
         identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, false);
     }
