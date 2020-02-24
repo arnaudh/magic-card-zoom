@@ -29,6 +29,7 @@
     "standard-eld",
     "standard-thb"
   ],
+  "includeBasicLands": false,
   "includeTokens": true,
   "devMode": false
 }
