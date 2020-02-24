@@ -113,6 +113,36 @@ function difference(a, b) {
     return [...a].filter(x => !b.includes(x));
 }
 
+function filterDict(dict, filter) {
+    // example: filterDict({'a':1,'b':1,'c':1}, ([k,v]) => ['a','c'].includes(k)))
+    fromEntries = arr => Object.assign({}, ...Array.from(arr, ([k, v]) => ({[k]: v}) ));
+    return fromEntries(Object.entries(dict).filter(filter));
+}
+
+function filterOutBasicLands(index) {
+    const basicLands = require("../../assets/metadata/cards/basic_lands.json");
+    let lengthBefore = Object.keys(index).length;
+    let filteredIndex = filterDict(index, ([k,v]) => !basicLands.includes(k));
+    let lengthAfter = Object.keys(filteredIndex).length;
+    console.log(`Removed basic lands: number of cards went from ${lengthBefore} to ${lengthAfter}`);
+    return filteredIndex;
+}
+
+function filterOutDuplicateIllustrations(index) {
+    const duplicateIllustrations = require('../../assets/metadata/cards/duplicate_illustrations.json');
+    let cardIdsToRemove = [];
+    for (const [illustrationId, cardIds] of Object.entries(duplicateIllustrations)) {
+        let cardIdsInIndex = cardIds.filter(cardId => index.hasOwnProperty(cardId));
+        if (cardIdsInIndex.length > 1) {
+            cardIdsToRemove.push(...cardIdsInIndex.slice(0,-1));
+        }
+    }
+    let lengthBefore = Object.keys(index).length;
+    let filteredIndex = filterDict(index, ([k,v]) => !cardIdsToRemove.includes(k));
+    let lengthAfter = Object.keys(filteredIndex).length;
+    console.log(`Removed duplicate illustrations: number of cards went from ${lengthBefore} to ${lengthAfter}`);
+    return filteredIndex;
+}
 
 module.exports.expandSets = expandSets;
 module.exports.allAvailableSets = allAvailableSets;
@@ -121,4 +151,6 @@ module.exports.getMtgSetName = getMtgSetName;
 module.exports.getMtgSetIconUrl = getMtgSetIconUrl;
 module.exports.getStandardInfo = getStandardInfo;
 module.exports.findMtgStandardInText = findMtgStandardInText;
+module.exports.filterOutBasicLands = filterOutBasicLands;
+module.exports.filterOutDuplicateIllustrations = filterOutDuplicateIllustrations;
 

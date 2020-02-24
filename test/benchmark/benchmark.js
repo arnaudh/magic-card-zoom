@@ -22,6 +22,7 @@ program
     .parse(process.argv);
 
 let includeBasicLands = true;
+let includeDuplicateIllustrations = true;
 
 youtubeVideoFormats = {
   "sQk7RSUgsA4": "standard-akh",
@@ -130,13 +131,6 @@ function average(arr) {
     return arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 }
 
-
-function filterDict(dict, filter) {
-    // example: filterDict({'a':1,'b':1,'c':1}, ([k,v]) => ['a','c'].includes(k)))
-    Object.fromEntries = arr => Object.assign({}, ...Array.from(arr, ([k, v]) => ({[k]: v}) ));
-    return Object.fromEntries(Object.entries(dict).filter(filter));
-}
-
 function doTest(cvwrapper) {
     console.log('doTest');
     let identify_services = {}
@@ -146,10 +140,10 @@ function doTest(cvwrapper) {
             index = {...index, ...indexes[mtg_set]};
         }
         if (!includeBasicLands) {
-            let lengthBefore = Object.keys(index).length;
-            index = filterDict(index, ([k,v]) => !basicLands.includes(k));
-            let lengthAfter = Object.keys(index).length;
-            console.log(`Removing basic lands: drops the number of cards from ${lengthBefore} to ${lengthAfter}`);
+            index = mtg_sets.filterOutBasicLands(index);
+        }
+        if (!includeDuplicateIllustrations) {
+            index = mtg_sets.filterOutDuplicateIllustrations(index);
         }
         identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, false);
     }
