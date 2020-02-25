@@ -1,9 +1,11 @@
 
-# Magic Card Zoom: how it works
+# MagicCardZoom: how it works
 
 MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
 
 The way it works is by using a feature descriptor to detect points of interests (keypoints) from the video, and to match them to keypoints of cards coming from a pre-selected pool of cards.
+
+Note that the identification process is done entirely in the browser; no data is sent over the network, and therefore the user's data is kept private.
 
 <br/>
 
@@ -31,7 +33,7 @@ This part happens in the browser whenever the user stops their mouse over a card
 
 5. **For every keypoint:** (ordered by closeness to cursor)
 
-    1. **Find index feature closest to keypoint feature**. A brute force search over all the features in the index is performed to find the index feature that is the closest to the input keypoint feature (Hamming distance is used). The card corresponding to that index feature is then checked for proper match in the following steps.
+    1. **Find index feature closest to keypoint feature**. A brute force search over all the features in the index is performed to find the index feature that is the closest to the input keypoint feature (using Hamming distance). The card corresponding to that index feature is then checked for proper match in the following steps.
 
     2. **Match input features to index card features**. Features of the input screenshot and of the index card are matched using K-Nearest-Neighbors and ratio test (see [this OpenCV tutorial](https://docs.opencv.org/trunk/dc/dc3/tutorial_py_matcher.html) for more details).
 

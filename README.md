@@ -1,4 +1,4 @@
-# MagicCardZoom
+# ![Logo](src/img/icon30.svg) MagicCardZoom
 
 MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
 
