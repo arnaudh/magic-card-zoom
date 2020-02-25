@@ -28,43 +28,46 @@ class IdentifyService {
         // console.log('IdentifyService', this.name);
     }
 
-    async identifyMultiScales(imageData, potentialCardHeights, previousMatches, cv_debug) {
+    identifyMultiScales(imageData, potentialCardHeights, previousMatches, loopAndCheckForCancellation, callback, cv_debug) {
         const timer = new Timer();
         let matches = [];
-        for (let i = 0; i < potentialCardHeights.length; i++) {
-            let cardHeight = potentialCardHeights[i];
-            let scale = this.featuresDescriptor.cardHeight / cardHeight;
+        let that = this;
+        let myFFF = function(cardHeight) {
+            let i = -1000;
+        // for (let i = 0; i < potentialCardHeights.length; i++) {
+        //     let cardHeight = potentialCardHeights[i];
+            let scale = that.featuresDescriptor.cardHeight / cardHeight;
             let newWidth = Math.round(scale * imageData.width);
             let newHeight = Math.round(scale * imageData.height);
             let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
-            // console.log(`identifyMultiScales: resized[${i}] ${timer.get()}`);
             if (cv_debug) {
                 cv_debug.setDescriptorInputImg(cv_debug.fromImageData(imageDataResized));
             }
 
             let imgSize = [imageDataResized.width, imageDataResized.height];
             let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
-            let query_description = this.featuresDescriptor.describe(imageDataResized, cv_debug);
-            // console.log(`identifyMultiScales: described[${i}] ${timer.get()}`);
+            let query_description = that.featuresDescriptor.describe(imageDataResized, cv_debug);
 
-            matches = this.checkMatchPreviousMatches(previousMatches, query_description, cursorPosition);
-            // console.log(`identifyMultiScales: checkedPreviousMatches[${i}] ${timer.get()}`);
+            matches = that.checkMatchPreviousMatches(previousMatches, query_description, cursorPosition);
+            console.log(`identifyMultiScales: checkedPreviousMatches[${i}] ${timer.get()}`);
 
             if (matches.length === 0) {
-                matches = this.identifySingleScale(imageDataResized, query_description, cv_debug);
-                // console.log(`identifyMultiScales: identified[${i}] ${timer.get()}`);
+                matches = that.identifySingleScale(imageDataResized, query_description, cv_debug);
+                console.log(`identifyMultiScales: identified[${i}] ${timer.get()}`);
             }
             if (matches.length > 0) {
                 matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
-                break;
+                // break;
+                return {matches: matches };
             }
+            return null;
         }
-        // console.log(`identifyMultiScales: DONE ${timer.get()}`);
-        // console.log(`identifyMultiScales RETURN ${{matches: matches, time: timer.get() }}`);
-        return {
-            matches: matches,
-            time: timer.get()
-        }
+        loopAndCheckForCancellation(myFFF, potentialCardHeights, callback);
+        
+        // return {
+        //     matches: matches,
+        //     time: timer.get()
+        // }
     }
 
 

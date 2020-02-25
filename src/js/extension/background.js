@@ -48,6 +48,27 @@ chrome.runtime.onInstalled.addListener(function() {
   });
 });
 
+function loopAndCheckForCancellation(functionToLoop, values, callback) {
+  console.log('LOOPANDCHECKFORCANCELLATION; values=', values,' LATEST_MESSAGE_ID=',LATEST_MESSAGE_ID);
+  let originalMessageID = LATEST_MESSAGE_ID;
+  let first = values.shift();
+  if (typeof first !== 'undefined') {
+    setTimeout(
+      function() {
+          console.log('TIMEOUT OVER, originalMessageID=', originalMessageID, 'LATEST_MESSAGE_ID=', LATEST_MESSAGE_ID);
+          if (checkMessageOutdated(originalMessageID, 'pleaseLoopMe')) return;
+          let result = functionToLoop(first);
+          if (result) {
+            console.log('Loop got result, Stopping the loop, calling the callback');
+            callback(result);
+          } else {
+            loopAndCheckForCancellation(functionToLoop, values, callback);
+          }
+      }, 0);
+  } else {
+    console.log('Reached the end of the loopAndCheckForCancellation, first=', first);
+  }
+}
 
 // sender.tab is set for messages sent by content script, NOT by popup
 chrome.runtime.onMessage.addListener(
@@ -199,6 +220,21 @@ function stopTabRecording(tabId) {
   chrome.pageAction.setIcon({tabId: tabId, path: 'icon128.png'});
 }
 
+function identifyCardHAHA(message, tab, sendResponse) {
+  loopAndCheckForCancellation(function(val){
+    console.log(`CALLING F WITH ${val}`);
+    if (val > 3) {
+      return 1;
+    } else {
+      return null;
+    }
+  },
+  [0,1,2,3,4,5],
+  function (val) {
+    console.log('Callback got:', val);
+  });
+}
+
 function identifyCard(message, tab, sendResponse) {
   let timer = new Timer(message.data.timer);
   console.log('timer', timer);
@@ -334,8 +370,12 @@ function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
 
 function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse, timer) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
-  mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer)
-    .then(results => {
+  // mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer)
+  mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer,
+  // let results = mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer);
+    // .then(results => {
+      loopAndCheckForCancellation,
+    function(results) {
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];
       let response;
@@ -365,6 +405,7 @@ function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights
       console.log(`${new Date().toISOString()} calling back sendResponse() with card ${response.card}`);
       sendResponse(response);
     });
+    // });
 }
 
 function checkMessageOutdated(messageID, stepName) {

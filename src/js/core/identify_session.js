@@ -14,7 +14,7 @@ class IdentifySession {
         this.contourFinder = new ContourFinder(cvwrapper);
     }
     
-    async identify(videoImageData, closeupImageData, defaultPotentialCardHeights, timer, cv_debug = null) {
+    identify(videoImageData, closeupImageData, defaultPotentialCardHeights, timer, loopAndCheckForCancellation, callback, cv_debug = null) {
         let previousMatchCardHeights = [];
         if (this.withHistory) {
             previousMatchCardHeights = this.previousMatches.slice(-1).map(matches => matches[0].cardHeightRatio * videoImageData.height);
@@ -22,28 +22,34 @@ class IdentifySession {
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData, cv_debug);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
         potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
-        console.log('|previousMatchCardHeights', previousMatchCardHeights);
-        console.log('|estimatedPotentialCardHeights', estimatedPotentialCardHeights);
-        console.log('|defaultPotentialCardHeights', defaultPotentialCardHeights);
+        // console.log('|previousMatchCardHeights', previousMatchCardHeights);
+        // console.log('|estimatedPotentialCardHeights', estimatedPotentialCardHeights);
+        // console.log('|defaultPotentialCardHeights', defaultPotentialCardHeights);
         console.log('|=> potentialCardHeights', potentialCardHeights);
         let matches = [];
 
-        let resultMultiScales = await this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches);
-        console.log(`resultMultiScales = ${resultMultiScales}`);
-        if (resultMultiScales.matches.length > 0) {
-            matches = resultMultiScales.matches;
-            matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
-            if (this.withHistory) {
-                this.previousMatches.push(matches);
-                if (this.previousMatches.length > MAX_HISTORY_SIZE) {
-                    this.previousMatches.shift(1); // Remove oldest entry
+        // TODO here only run identify on 1 scale, and then hop through Chrome message system to make sure we don't have a new message
+        let that = this;
+        let callbackHere = function(resultMultiScales) {
+            if (resultMultiScales.matches.length > 0) {
+                matches = resultMultiScales.matches;
+                matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
+                if (that.withHistory) {
+                    that.previousMatches.push(matches);
+                    if (that.previousMatches.length > MAX_HISTORY_SIZE) {
+                        that.previousMatches.shift(1); // Remove oldest entry
+                    }
                 }
             }
+            timer.top('IdentifySession.identify');
+            callback({
+                matches: matches
+            });
         }
-        timer.top('IdentifySession.identify');
-        return {
-            matches: matches
-        }
+        // let resultMultiScales = this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, callback);
+        this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, callbackHere);
+        // console.log(`resultMultiScales = ${resultMultiScales}`);
+
     }
 }
 
