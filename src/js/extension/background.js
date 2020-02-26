@@ -235,7 +235,6 @@ function identifyCardHAHA(message, tab, sendResponse) {
 
 function identifyCard(message, tab, sendResponse) {
   let timer = new Timer(message.data.timer);
-  console.log('timer', timer);
   timer.top('enter identifyCard')
   if (checkMessageOutdated(message.messageID, 'identifyCard')) return;
   
@@ -338,8 +337,6 @@ function cropImage(dataUrl, cropLocation, cropSize, callback) {
 
 
 function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
-  console.log('boundingRect1', boundingRect1);
-  console.log('boundingRect2', boundingRect2);
   let sourceImage = new Image();
 
   sourceImage.onload = function() {

@@ -107,7 +107,7 @@ class Matcher {
         let that = this;
         // let funToLoop = function(k) {
         loopAndCheckForCancellation(maxK, function loopMatchAroundCursor(k, nextInnerLoop) {
-            console.log('matchAroundCursor k=', k);
+            // console.log('matchAroundCursor k=', k);
             // let timer_loop = new Timer();
             let bests = that.searcher.knn(features[k], 1);
             let best = bests[0];
@@ -140,7 +140,7 @@ class Matcher {
                     contour: matchedCardContour
                 };
                 // break;
-                console.log('GOT A MATCH, CALLING CALLBACK. THIS SHOULD END ALL LOOPS');
+                console.log(`MATCHED with k=${k}`);
                 callback(result); return;
             } else {
                 card_ids_checked_no_match.push(card_id);

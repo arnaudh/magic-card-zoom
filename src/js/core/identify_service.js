@@ -29,13 +29,17 @@ class IdentifyService {
     }
 
     identifyMultiScales(imageData, potentialCardHeights, previousMatches, loopAndCheckForCancellation, callback, cv_debug) {
-        const timer = new Timer();
         let matches = [];
         let that = this;
         // let myFFF = function(cardHeight) {
         loopAndCheckForCancellation(potentialCardHeights.length, function loopIdentifyMultiScales(i, next) {
+            const timer = new Timer();
+            let nextWithPrint = function() {
+                console.log(`identifyMultiScales[${i}]: not identified ${timer.get()} ms`); timer.reset();
+                next();
+            }
             let cardHeight = potentialCardHeights[i];
-            console.log(`Checking cardHeight[${i}] = ${cardHeight}`);
+            console.log(`identifyMultiScales[${i}]: cardHeight = ${cardHeight}px`);
             // let i = -1000;
         // for (let i = 0; i < potentialCardHeights.length; i++) {
         //     let cardHeight = potentialCardHeights[i];
@@ -52,25 +56,27 @@ class IdentifyService {
             let query_description = that.featuresDescriptor.describe(imageDataResized, cv_debug);
 
             matches = that.checkMatchPreviousMatches(previousMatches, query_description, cursorPosition);
-            console.log(`identifyMultiScales: checkedPreviousMatches[${i}] ${timer.get()}`);
+            console.log(`identifyMultiScales[${i}]: checkedPreviousMatches ${timer.get()} ms`); timer.reset();
 
             let doneIdentifySingleScale = function(matches) {
-                console.log(`identifyMultiScales: identified[${i}] ${timer.get()}`);
                 if (matches.length > 0) {
+                    console.log(`identifyMultiScales[${i}]: identified ${timer.get()} ms`); timer.reset();
+                    let cardHeightsString = potentialCardHeights.map((h, ind) => (ind==i) ? '('+h+')' : h).join(', ')
+                    console.log(`MATCHED on cardHeight: [${cardHeightsString}]`);
                     matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
                     // break;
                     callback({matches: matches });
                 } else {
                     // callback2(null);
-                    console.log('hmm not sure where I am at now. no matches after identifyMultiScales, I guess it will go to the next cardHeight now? I hope?');
-                    next();
+                    // console.log('hmm not sure where I am at now. no matches after identifyMultiScales, I guess it will go to the next cardHeight now? I hope?');
+                    nextWithPrint();
                 }
             };
             if (matches.length > 0) {
                 doneIdentifySingleScale(matches);
             } else {
                 // matches = 
-                that.identifySingleScale(imageDataResized, query_description, loopAndCheckForCancellation, doneIdentifySingleScale, next, cv_debug);
+                that.identifySingleScale(imageDataResized, query_description, loopAndCheckForCancellation, doneIdentifySingleScale, nextWithPrint, cv_debug);
             }
             // if (matches.length > 0) {
             //     matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
