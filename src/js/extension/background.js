@@ -48,26 +48,24 @@ chrome.runtime.onInstalled.addListener(function() {
   });
 });
 
-function loopAndCheckForCancellation(functionToLoop, values, callback) {
-  console.log('LOOPANDCHECKFORCANCELLATION; values=', values,' LATEST_MESSAGE_ID=',LATEST_MESSAGE_ID);
-  let originalMessageID = LATEST_MESSAGE_ID;
-  let first = values.shift();
-  if (typeof first !== 'undefined') {
-    setTimeout(
-      function() {
-          console.log('TIMEOUT OVER, originalMessageID=', originalMessageID, 'LATEST_MESSAGE_ID=', LATEST_MESSAGE_ID);
-          if (checkMessageOutdated(originalMessageID, 'pleaseLoopMe')) return;
-          let result = functionToLoop(first);
-          if (result) {
-            console.log('Loop got result, Stopping the loop, calling the callback');
-            callback(result);
-          } else {
-            loopAndCheckForCancellation(functionToLoop, values, callback);
-          }
-      }, 0);
-  } else {
-    console.log('Reached the end of the loopAndCheckForCancellation, first=', first);
-  }
+// https://stackoverflow.com/questions/16562221/javascript-nested-loops-with-settimeout
+function loopAndCheckForCancellation(count, f, done) {
+    let originalMessageID = LATEST_MESSAGE_ID;
+    var counter = 0;
+    var next = function () {
+        setTimeout(iteration, 0);
+    };
+    var iteration = function () {
+        if (checkMessageOutdated(originalMessageID, `loopAndCheckForCancellation(${count}, ${f.name})`)) {
+          return;
+        } else if (counter >= count) {
+            done && done();
+        } else {
+            f(counter, next);
+        }
+        counter++;
+    }
+    iteration();
 }
 
 // sender.tab is set for messages sent by content script, NOT by popup

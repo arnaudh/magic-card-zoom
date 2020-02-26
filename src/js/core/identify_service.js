@@ -32,8 +32,11 @@ class IdentifyService {
         const timer = new Timer();
         let matches = [];
         let that = this;
-        let myFFF = function(cardHeight) {
-            let i = -1000;
+        // let myFFF = function(cardHeight) {
+        loopAndCheckForCancellation(potentialCardHeights.length, function loopIdentifyMultiScales(i, next) {
+            let cardHeight = potentialCardHeights[i];
+            console.log(`Checking cardHeight[${i}] = ${cardHeight}`);
+            // let i = -1000;
         // for (let i = 0; i < potentialCardHeights.length; i++) {
         //     let cardHeight = potentialCardHeights[i];
             let scale = that.featuresDescriptor.cardHeight / cardHeight;
@@ -51,18 +54,33 @@ class IdentifyService {
             matches = that.checkMatchPreviousMatches(previousMatches, query_description, cursorPosition);
             console.log(`identifyMultiScales: checkedPreviousMatches[${i}] ${timer.get()}`);
 
-            if (matches.length === 0) {
-                matches = that.identifySingleScale(imageDataResized, query_description, cv_debug);
+            let doneIdentifySingleScale = function(matches) {
                 console.log(`identifyMultiScales: identified[${i}] ${timer.get()}`);
-            }
+                if (matches.length > 0) {
+                    matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
+                    // break;
+                    callback({matches: matches });
+                } else {
+                    // callback2(null);
+                    console.log('hmm not sure where I am at now. no matches after identifyMultiScales, I guess it will go to the next cardHeight now? I hope?');
+                    next();
+                }
+            };
             if (matches.length > 0) {
-                matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
-                // break;
-                return {matches: matches };
+                doneIdentifySingleScale(matches);
+            } else {
+                // matches = 
+                that.identifySingleScale(imageDataResized, query_description, loopAndCheckForCancellation, doneIdentifySingleScale, next, cv_debug);
             }
-            return null;
-        }
-        loopAndCheckForCancellation(myFFF, potentialCardHeights, callback);
+            // if (matches.length > 0) {
+            //     matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
+            //     // break;
+            //     return {matches: matches };
+            // }
+            // return null;
+        }, callback);
+        
+        // loopAndCheckForCancellation(myFFF, potentialCardHeights, callback);
         
         // return {
         //     matches: matches,
@@ -101,7 +119,7 @@ class IdentifyService {
         return matches;
     }
 
-    identifySingleScale(imageData, query_description, cv_debug = null) {        
+    identifySingleScale(imageData, query_description, loopAndCheckForCancellation, callback, nextOuterLoop, cv_debug = null) {        
         const timer = new Timer();
         if (! imageData.data) {
             throw 'Expected imageData'
@@ -109,16 +127,19 @@ class IdentifyService {
         
         let imgSize = [imageData.width, imageData.height];
         let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
-        let result = this.featuresMatcher.matchAroundCursor(query_description, cursorPosition, cv_debug);
-        let matches_per_card_id_sorted;
-        if (result) {
-            matches_per_card_id_sorted = [result];
-        } else {
-            matches_per_card_id_sorted = [];
-        }
-        
-        // console.log("identifySingleScale: DONE in " + timer.get() + " ms.");
-        return matches_per_card_id_sorted
+        // let result = 
+        this.featuresMatcher.matchAroundCursor(query_description, cursorPosition, loopAndCheckForCancellation, function doneMatchAroundCursor(result) {
+            let matches_per_card_id_sorted;
+            if (result) {
+                matches_per_card_id_sorted = [result];
+            } else {
+                matches_per_card_id_sorted = [];
+            }
+            
+            // console.log("identifySingleScale: DONE in " + timer.get() + " ms.");
+            // return matches_per_card_id_sorted
+            callback(matches_per_card_id_sorted);
+        }, nextOuterLoop, cv_debug);
     }
 }
 

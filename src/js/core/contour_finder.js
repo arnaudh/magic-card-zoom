@@ -11,7 +11,6 @@ class ContourFinder {
 
     getPotentialCardHeights(imageData, cvDebug = null) {
         let rectangles = this.cvwrapper.findRectangles(imageData);
-        console.log('rectangles', rectangles);
         let rectanglesNotOnBorder = discardRectanglesOnBorderOfImage(rectangles, [imageData.width, imageData.height]);
         let rectanglesMtgRatio = rectanglesNotOnBorder.filter(hasMtgRatio);
         if (cvDebug) {
@@ -21,21 +20,16 @@ class ContourFinder {
         }
         
         let rectangleLengths = rectanglesMtgRatio.map(getRectangleLength);
-        console.log('rectangleLengths', rectangleLengths);
         
         let dbscan = new clustering.DBSCAN();
         let clusters = dbscan.run(rectangleLengths.map(l => [l]), 3, 2);
-        // console.log('clusters', clusters, 'dbscan.noise', dbscan.noise);
         let clustersWithNoise = clusters.concat(dbscan.noise.map(x => [x]));
-        // console.log('clustersWithNoise', clustersWithNoise);
 
         let countAndAverage = clustersWithNoise.map(cluster => {
             let avg = mean(cluster.map(i => rectangleLengths[i]));
             return [cluster.length, avg];
         });
-        // console.log('countAndAverage', countAndAverage);
         let potentialCardHeights = countAndAverage.sort((a, b) => b[0] - a[0]).map(a => a[1]);
-        console.log('potentialCardHeights', potentialCardHeights);
         return potentialCardHeights;
     }
 

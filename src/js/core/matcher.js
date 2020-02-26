@@ -80,7 +80,7 @@ class Matcher {
     }
 
 
-    matchAroundCursor(description, cursorPosition, cv_debug) {
+    matchAroundCursor(description, cursorPosition, loopAndCheckForCancellation, callback, nextOuterLoop, cv_debug) {
         let TOP_K = 1;
         let timer = new Timer();
         // logDescription(description);
@@ -102,44 +102,58 @@ class Matcher {
         let k;
         let card_ids_checked_no_match = [];
         let result = null;
-        for (k = 0; k < maxK; k++) {
-            let timer_loop = new Timer();
-            let bests = this.searcher.knn(features[k], 1);
+
+        // for (k = 0; k < maxK; k++) {
+        let that = this;
+        // let funToLoop = function(k) {
+        loopAndCheckForCancellation(maxK, function loopMatchAroundCursor(k, nextInnerLoop) {
+            console.log('matchAroundCursor k=', k);
+            // let timer_loop = new Timer();
+            let bests = that.searcher.knn(features[k], 1);
             let best = bests[0];
-            let card_id = this.card_ids[best.i];
+            let card_id = that.card_ids[best.i];
             best.k = k;
 
             let match = {
                 keypoint1: keypoints[k],
                 feature1: features[k],
-                keypoint2: this.all_keypoints[best.i],
-                feature2: this.all_features[best.i],
+                keypoint2: that.all_keypoints[best.i],
+                feature2: that.all_features[best.i],
                 distance: best.distance
             }
             matches_per_card_id[card_id].push(match);
 
             if (card_ids_checked_no_match.includes(card_id)) {
                 console.log(`not checking again ${card_id}`);
-                continue;
+                // continue;
+                nextInnerLoop(); return;
             }
-            if (matches_per_card_id[card_id].length < this.minMatches) {
-                continue;
+            if (matches_per_card_id[card_id].length < that.minMatches) {
+                // continue;
+                nextInnerLoop(); return;
             }
 
-            let matchedCardContour = this.checkMatch(description, card_id, cursorPosition, cv_debug);
+            let matchedCardContour = that.checkMatch(description, card_id, cursorPosition, cv_debug);
             if (matchedCardContour) {
                 result = {
                     card_id: card_id,
                     contour: matchedCardContour
                 };
-                break;
+                // break;
+                console.log('GOT A MATCH, CALLING CALLBACK. THIS SHOULD END ALL LOOPS');
+                callback(result); return;
             } else {
                 card_ids_checked_no_match.push(card_id);
+                nextInnerLoop(); return;
             }
-        }
+        }, nextOuterLoop);
 
-        console.log(`matchAroundCursor() result = ${result} after testing ${k+1} features (minMatches=${this.minMatches}, maxMatches=${this.maxMatches}) DONE in ${timer_total.get()} ms`);
-        return result;
+        // let range = Array.from({length: maxK}, (x,i) => i);
+        // loopAndCheckForCancellation(funToLoop, range, callback);
+
+
+        // console.log(`matchAroundCursor() result = ${result} after testing ${k+1} features (minMatches=${this.minMatches}, maxMatches=${this.maxMatches}) DONE in ${timer_total.get()} ms`);
+        // return result;
     }
 
     checkMatch(description, card_id, cursorPosition, cv_debug) {
@@ -152,14 +166,14 @@ class Matcher {
         let matchesSingleCard = this.deduplicateMatches(matchesSingleCardWithDupes);
 
         if (matchesSingleCard.length < this.singleCardMatchesMin) {
-            console.log('Too few matches single card', card_id, matchesSingleCard.length, 'min', this.singleCardMatchesMin);
+            // console.log('Too few matches single card', card_id, matchesSingleCard.length, 'min', this.singleCardMatchesMin);
             return null;
         }
 
         let affineResult = this.estimateAffineTransform(matchesSingleCard, cv_debug, card_id);
         let affineSensible = this.isAffineResultSensible(affineResult);
         if (!affineSensible) {
-            console.log('affine transform not sensible', card_id);
+            // console.log('affine transform not sensible', card_id);
             return null;
         }
         let matchedCardContour = this.getMatchedCardContour(affineResult.transform, cv_debug, card_id);
@@ -216,13 +230,13 @@ class Matcher {
         let keypoints1 = matches.map(m => m.keypoint1);
         let keypoints2 = matches.map(m => m.keypoint2);
         let affineResult = this.cvwrapper.estimateAffinePartial2D(keypoints1, keypoints2);
-        console.log('affineResult.transform', affineResult.transform);
-        console.log('affineResult.transformComponents', affineResult.transformComponents);
+        // console.log('affineResult.transform', affineResult.transform);
+        // console.log('affineResult.transformComponents', affineResult.transformComponents);
 
         if (cv_debug && cv_debug.descriptor_input_img) {
             let mask = affineResult.inliers.filter(i => i[0] === 1);
             let matchesAffine = matches.filter((x, i) => mask[i]);
-            console.log('matchesAffine', matchesAffine);
+            // console.log('matchesAffine', matchesAffine);
             let min_matches = 2;
             cv_debug.drawAndSaveMatches(card_id, matchesAffine, `matcher/matches_affine_${card_id}.png`, min_matches);
         }
@@ -262,7 +276,7 @@ class Matcher {
     }
 
     matchBetweenDescriptions(description_1, description_2) {
-        console.log(`matchBetweenDescriptions(${description_1.keypoints.length}, ${description_2.keypoints.length})`);
+        // console.log(`matchBetweenDescriptions(${description_1.keypoints.length}, ${description_2.keypoints.length})`);
         let searcher = searchers.fromName('bruteforce-hamming');
         searcher.setPoints(description_2.features);
 

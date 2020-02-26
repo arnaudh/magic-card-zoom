@@ -30,8 +30,10 @@ class IdentifySession {
 
         // TODO here only run identify on 1 scale, and then hop through Chrome message system to make sure we don't have a new message
         let that = this;
-        let callbackHere = function(resultMultiScales) {
-            if (resultMultiScales.matches.length > 0) {
+        // let callbackHere = 
+        // let resultMultiScales = this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, callback);
+        this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, function doneIdentifyMultiScales(resultMultiScales) {
+            if (resultMultiScales && resultMultiScales.matches.length > 0) {
                 matches = resultMultiScales.matches;
                 matches[0].cardHeightRatio = matches[0].cardHeight / videoImageData.height;
                 if (that.withHistory) {
@@ -45,9 +47,7 @@ class IdentifySession {
             callback({
                 matches: matches
             });
-        }
-        // let resultMultiScales = this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, callback);
-        this.identifyService.identifyMultiScales(closeupImageData, potentialCardHeights, this.previousMatches, loopAndCheckForCancellation, callbackHere);
+        });
         // console.log(`resultMultiScales = ${resultMultiScales}`);
 
     }
