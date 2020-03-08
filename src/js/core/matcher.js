@@ -6,13 +6,14 @@ const robustPointInPolygon = require("robust-point-in-polygon");
 const MTG_LENGTH_TO_WIDTH_RATIO = 1.426;
 
 class Matcher {
-    constructor(name, jsonIndex, indexCardHeight, searcher, cvwrapper) {
+    constructor(name, jsonIndex, indexCardHeight, searcher, cvwrapper, loopAndCheckForCancellation) {
         let timer = new Timer();
         this.all_features = [];
         this.all_keypoints = [];
         this.card_ids = [];
         this.all_descriptions = jsonIndex;
         this.indexCardHeight = indexCardHeight;
+        this.loopAndCheckForCancellation = loopAndCheckForCancellation;
 
         let match = /min([0-9]+)-max([0-9]+)-ratio([0-9.]+)min([0-9]+)-affine([01])/.exec(name);
         if (match) {
@@ -80,39 +81,22 @@ class Matcher {
     }
 
 
-    matchAroundCursor(description, cursorPosition, loopAndCheckForCancellation, callback, nextOuterLoop, cv_debug) {
-        let TOP_K = 1;
-        let timer = new Timer();
-        // logDescription(description);
+    matchAroundCursor(description, cursorPosition, callback, nextOuterLoop, cv_debug) {
         let keypoints = description['keypoints'];
         let features = description['features'];
         let matches_per_card_id = {};
         for (const card_id of this.card_ids) {
             matches_per_card_id[card_id] = [];
         }
-        // Sort keypoints by distance to cursorPosition
-        sortArraysBasedOnFirst(keypoints, features, function(a, b) {
-            let da = distance(a, cursorPosition);
-            let db = distance(b, cursorPosition);
-            return ((da < db) ? -1 : ((da == db) ? 0 : 1));
-        })
+        sortKeypointsAndFeaturesByDistanceToCursor(keypoints, features, cursorPosition);
 
-        let timer_total = new Timer();
         let maxK = Math.min(keypoints.length, this.maxMatches);
-        let k;
         let card_ids_checked_no_match = [];
-        let result = null;
-
-        // for (k = 0; k < maxK; k++) {
         let that = this;
-        // let funToLoop = function(k) {
-        loopAndCheckForCancellation(maxK, function loopMatchAroundCursor(k, nextInnerLoop) {
-            // console.log('matchAroundCursor k=', k);
-            // let timer_loop = new Timer();
+        this.loopAndCheckForCancellation(maxK, function loopMatchAroundCursor(k, nextInnerLoop) {
             let bests = that.searcher.knn(features[k], 1);
             let best = bests[0];
             let card_id = that.card_ids[best.i];
-            best.k = k;
 
             let match = {
                 keypoint1: keypoints[k],
@@ -124,36 +108,24 @@ class Matcher {
             matches_per_card_id[card_id].push(match);
 
             if (card_ids_checked_no_match.includes(card_id)) {
-                console.log(`not checking again ${card_id}`);
-                // continue;
                 nextInnerLoop(); return;
             }
             if (matches_per_card_id[card_id].length < that.minMatches) {
-                // continue;
                 nextInnerLoop(); return;
             }
 
             let matchedCardContour = that.checkMatch(description, card_id, cursorPosition, cv_debug);
             if (matchedCardContour) {
-                result = {
+                console.log(`MATCHED with keypoint k=${k}`);
+                callback({
                     card_id: card_id,
                     contour: matchedCardContour
-                };
-                // break;
-                console.log(`MATCHED with k=${k}`);
-                callback(result); return;
+                }); return;
             } else {
                 card_ids_checked_no_match.push(card_id);
                 nextInnerLoop(); return;
             }
         }, nextOuterLoop);
-
-        // let range = Array.from({length: maxK}, (x,i) => i);
-        // loopAndCheckForCancellation(funToLoop, range, callback);
-
-
-        // console.log(`matchAroundCursor() result = ${result} after testing ${k+1} features (minMatches=${this.minMatches}, maxMatches=${this.maxMatches}) DONE in ${timer_total.get()} ms`);
-        // return result;
     }
 
     checkMatch(description, card_id, cursorPosition, cv_debug) {
@@ -324,6 +296,14 @@ function sortArraysBasedOnFirst(arr1, arr2, sortFn) {
         arr1[k] = list[k].val1;
         arr2[k] = list[k].val2;
     }
+}
+
+function sortKeypointsAndFeaturesByDistanceToCursor(keypoints, features, cursorPosition) {
+    sortArraysBasedOnFirst(keypoints, features, function(a, b) {
+        let da = distance(a, cursorPosition);
+        let db = distance(b, cursorPosition);
+        return ((da < db) ? -1 : ((da == db) ? 0 : 1));
+    })
 }
 
 function isPointInPolygon(point, polygon) {

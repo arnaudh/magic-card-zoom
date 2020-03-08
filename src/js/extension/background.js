@@ -135,7 +135,7 @@ chrome.runtime.onMessage.addListener(
             .then(index => { 
               console.log('index size', Object.keys(index).length);
               console.log('USING cvwrapper in background.js');
-              mcz_active_tabs[currentTabId].identifySession = new IdentifySession(config.identifyServiceName, index, cvwrapper, true);
+              mcz_active_tabs[currentTabId].identifySession = new IdentifySession(config.identifyServiceName, index, cvwrapper, true, loopAndCheckForCancellation);
               console.log(`mcz_active_tabs (set identifySession of ${currentTabId})`, Object.keys(mcz_active_tabs));
 
               chrome.tabs.executeScript(currentTabId, {
@@ -369,7 +369,6 @@ function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights
   mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer,
   // let results = mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer);
     // .then(results => {
-      loopAndCheckForCancellation,
     function(results) {
       if (checkMessageOutdated(messageID, 'after identify')) return;
       let matches = results['matches'];

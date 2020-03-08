@@ -16,23 +16,22 @@ function logDescription(description) {
 
 class IdentifyService {
 
-    constructor(name, jsonIndex, cvwrapper) {
+    constructor(name, jsonIndex, cvwrapper, loopAndCheckForCancellation) {
         let [descriptorName, searcherName, matcherName] = name.split('_');
         this.name = name;
         this.featuresDescriptor = descriptors.fromName(descriptorName);
         if (!this.featuresDescriptor.cardHeight) {
             throw 'this.featuresDescriptor.cardHeight is not defined'
         }
-        this.featuresMatcher = new Matcher(matcherName, jsonIndex, this.featuresDescriptor.cardHeight, searchers.fromName(searcherName), cvwrapper);
+        this.featuresMatcher = new Matcher(matcherName, jsonIndex, this.featuresDescriptor.cardHeight, searchers.fromName(searcherName), cvwrapper, loopAndCheckForCancellation);
         this.contourFinder = new ContourFinder(cvwrapper);
-        // console.log('IdentifyService', this.name);
+        this.loopAndCheckForCancellation = loopAndCheckForCancellation;
     }
 
-    identifyMultiScales(imageData, potentialCardHeights, previousMatches, loopAndCheckForCancellation, callback, cv_debug) {
+    identifyMultiScales(imageData, potentialCardHeights, previousMatches, callback, cv_debug) {
         let matches = [];
         let that = this;
-        // let myFFF = function(cardHeight) {
-        loopAndCheckForCancellation(potentialCardHeights.length, function loopIdentifyMultiScales(i, next) {
+        this.loopAndCheckForCancellation(potentialCardHeights.length, function loopIdentifyMultiScales(i, next) {
             const timer = new Timer();
             let nextWithPrint = function() {
                 console.log(`identifyMultiScales[${i}]: not identified ${timer.get()} ms`); timer.reset();
@@ -40,9 +39,6 @@ class IdentifyService {
             }
             let cardHeight = potentialCardHeights[i];
             console.log(`identifyMultiScales[${i}]: cardHeight = ${cardHeight}px`);
-            // let i = -1000;
-        // for (let i = 0; i < potentialCardHeights.length; i++) {
-        //     let cardHeight = potentialCardHeights[i];
             let scale = that.featuresDescriptor.cardHeight / cardHeight;
             let newWidth = Math.round(scale * imageData.width);
             let newHeight = Math.round(scale * imageData.height);
@@ -60,38 +56,22 @@ class IdentifyService {
 
             let doneIdentifySingleScale = function(matches) {
                 if (matches.length > 0) {
-                    console.log(`identifyMultiScales[${i}]: identified ${timer.get()} ms`); timer.reset();
                     let cardHeightsString = potentialCardHeights.map((h, ind) => (ind==i) ? '('+h+')' : h).join(', ')
                     console.log(`MATCHED on cardHeight: [${cardHeightsString}]`);
-                    matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
-                    // break;
+                    console.log(`identifyMultiScales[${i}]: identified ${timer.get()} ms`); timer.reset();
+                    matches[0].cardHeightUsedForDetection = cardHeight;
+                    matches[0].measuredCardHeight = contourSideLength(matches[0].contour) / scale;
                     callback({matches: matches });
                 } else {
-                    // callback2(null);
-                    // console.log('hmm not sure where I am at now. no matches after identifyMultiScales, I guess it will go to the next cardHeight now? I hope?');
                     nextWithPrint();
                 }
             };
             if (matches.length > 0) {
                 doneIdentifySingleScale(matches);
             } else {
-                // matches = 
-                that.identifySingleScale(imageDataResized, query_description, loopAndCheckForCancellation, doneIdentifySingleScale, nextWithPrint, cv_debug);
+                that.identifySingleScale(imageDataResized, query_description, doneIdentifySingleScale, nextWithPrint, cv_debug);
             }
-            // if (matches.length > 0) {
-            //     matches[0].cardHeight = contourSideLength(matches[0].contour) / scale;
-            //     // break;
-            //     return {matches: matches };
-            // }
-            // return null;
         }, callback);
-        
-        // loopAndCheckForCancellation(myFFF, potentialCardHeights, callback);
-        
-        // return {
-        //     matches: matches,
-        //     time: timer.get()
-        // }
     }
 
 
@@ -125,7 +105,7 @@ class IdentifyService {
         return matches;
     }
 
-    identifySingleScale(imageData, query_description, loopAndCheckForCancellation, callback, nextOuterLoop, cv_debug = null) {        
+    identifySingleScale(imageData, query_description, callback, nextOuterLoop, cv_debug = null) {        
         const timer = new Timer();
         if (! imageData.data) {
             throw 'Expected imageData'
@@ -133,19 +113,19 @@ class IdentifyService {
         
         let imgSize = [imageData.width, imageData.height];
         let cursorPosition = [Math.round(imgSize[0]/2), Math.round(imgSize[1]/2)];
-        // let result = 
-        this.featuresMatcher.matchAroundCursor(query_description, cursorPosition, loopAndCheckForCancellation, function doneMatchAroundCursor(result) {
-            let matches_per_card_id_sorted;
-            if (result) {
-                matches_per_card_id_sorted = [result];
-            } else {
-                matches_per_card_id_sorted = [];
-            }
-            
-            // console.log("identifySingleScale: DONE in " + timer.get() + " ms.");
-            // return matches_per_card_id_sorted
-            callback(matches_per_card_id_sorted);
-        }, nextOuterLoop, cv_debug);
+        this.featuresMatcher.matchAroundCursor(
+            query_description,
+            cursorPosition,
+            function doneMatchAroundCursor(result) {
+                if (result) {
+                    callback([result]);
+                } else {
+                    callback([]);
+                }
+            },
+            nextOuterLoop,
+            cv_debug
+        );
     }
 }
 
