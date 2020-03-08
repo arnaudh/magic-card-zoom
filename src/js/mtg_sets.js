@@ -2,43 +2,55 @@ const standardDict = require("../../assets/metadata/sets/standard.json");
 const allSetsInfo = require("../../assets/metadata/sets/sets.json");
 const config = require("../../config.json");
 
+// Available sets = core, expansion & token sets (with a few exceptions)
+let allAvailableSetsInfo = allSetsInfo.filter(function(info) {
+    if (["fbb", "4bb" ,"sum"].includes(info.code)) {
+        // these 'core' sets are special reprints of other sets
+        return false;
+    } else if(info.code === 'chr') {
+        // Chronicles is a 'masters' set but still was part of Standard (https://en.wikipedia.org/wiki/Magic:_The_Gathering_compilation_sets#Chronicles)
+        return true;
+    } else {
+        return ["core", "expansion", "token"].includes(info.set_type);
+    }
+});
+let allAvailableSets = allAvailableSetsInfo.map(info => info.code);
 
 let setsDict = {};
-for (let set_info of allSetsInfo) {
+for (let set_info of allAvailableSetsInfo) {
     setsDict[set_info.code] = set_info;
 }
-const allSets = Object.keys(setsDict);
-
 
 let allAvailableStandards = [];
-let allAvailableSets = [];
 for (let availableStandard of config.availableStandards) {
     allAvailableStandards.push(availableStandard);
-    allAvailableSets.push(...expandSets([availableStandard]));
 }
-allAvailableSets = unique(allAvailableSets);
 
-function expandSets (mtg_sets) {
+function expandSets (mtg_sets, includeTokens=config.includeTokens) {
     if (typeof mtg_sets === "string") {
         mtg_sets = [mtg_sets];
     }
     let actual_mtg_sets = [];
     let without = false;
+    let allSetsToConsiderInfo = allAvailableSetsInfo;
+    if (!includeTokens) {
+        allSetsToConsiderInfo = allSetsToConsiderInfo.filter(info => info.set_type !== "token");
+    }
     for (let mtg_set of mtg_sets) {
         let match = /^standard-(.+)$/.exec(mtg_set);
         let mtg_sets_to_append;
         if (match) {
             mtg_sets_to_append = getLegalSetsForStandard(match[1]);
-        // } else if (mtg_groups.includes(mtg_set)) {
-            // mtg_sets_to_append = mtg_groups[mtg_set]
         } else if (mtg_set == "all") {
-            mtg_sets_to_append = allSets;
-        } else if (mtg_set == "allowed") {
-            mtg_sets_to_append = allAvailableSets;
+            mtg_sets_to_append = allSetsToConsiderInfo.map(info => info.code);
+        } else if (mtg_set == "modern") {
+            mtg_sets_to_append = allSetsSince(allSetsToConsiderInfo, '8ed');
+        } else if (mtg_set == "pioneer") {
+            mtg_sets_to_append = allSetsSince(allSetsToConsiderInfo, 'rtr');
         } else if (mtg_set == "without") {
             without = true;
             continue;
-        } else if (allSets.includes(mtg_set)) {
+        } else if (allAvailableSets.includes(mtg_set)) {
             mtg_sets_to_append = [mtg_set]
         } else {
             throw `Unknown mtg_set ${mtg_set}`;
@@ -50,17 +62,13 @@ function expandSets (mtg_sets) {
             actual_mtg_sets.push(...mtg_sets_to_append);
         }
     }
-    if (config.includeTokens) {
-        for (let set_info of allSetsInfo) {
-            // assumes 1 level of parenting max
-            if (set_info.parent_set_code &&
-                actual_mtg_sets.includes(set_info.parent_set_code) &&
-                set_info.name.includes('Tokens')) {
-                actual_mtg_sets.push(set_info.code);
-            }
-        }
-    }
     return actual_mtg_sets;
+}
+
+function allSetsSince(allSetsToConsiderInfo, code) {
+    let index = allSetsToConsiderInfo.findIndex(info => info.code === code);
+    // Assumes allSetsToConsiderInfo are ordered from most recent to oldest
+    return allSetsToConsiderInfo.map(info => info.code).slice(0, index+1);
 }
 
 function getLegalSetsForStandard(mtg_set) {

@@ -1,60 +1,34 @@
 
 body {
-    margin: 7px 10px;
-    font-size: 13px;
+    margin: 10px 13px;
+    font-size: 14px;
+}
+
+select {
+    font-size: 14px;
+    vertical-align: baseline;
+    margin-top: -2px;
 }
 
 #main-div {
     display: inline-block;
+}
+
+#radios-div {
     white-space: nowrap;
 }
 
-table {
-  border: 2px solid #FFFFFF;
-  width: 100%;
-  border-collapse: collapse;
-}
-th {
-    border-bottom: 1px solid #000;
-    padding: 5px 4px;
-}
-td {
-  padding: 1px 4px;
-  text-align: center;
-}
-td:last-child {
-  text-align: left;
-}
-tr:not(:first-child):not(.selected):hover {
-    background-color: #CCC;
-    cursor: pointer;
-}
-tr.selected {
-    background-color: #111;
-    color: white;
-}
-tr.selected img {
-    -webkit-filter: invert(1);
-    filter: invert(1);
+#main-div > div {
+    margin-bottom: 14px;
 }
 
-.tooltip {
-  position: relative;
+#selected-sets-label {
+    margin-bottom: 10px;
+    vertical-align: top;
 }
-.tooltip .tooltiptext {
-    visibility: hidden;
-    background-color: #444;
-    color: white;
-    text-align: center;
-    border-radius: 6px;
-    position: absolute;
-    z-index: 1;
-    width: 390px;
-    padding: 5px;
-    margin: 20px 0px 0px 0px;
-}
-.tooltip:hover .tooltiptext {
-  visibility: visible;
+
+#radios-div > div {
+    height: 21px;
 }
 
 .mtg-set-icon {
@@ -73,9 +47,9 @@ button {
     text-decoration: none;
     display: inline-block;
     border-radius: 4px;
-    margin: 0 5px; 
     font-size: 13px;
     cursor: pointer;
+    white-space: nowrap;
 }
 button:disabled {
     background-color: #AAA;

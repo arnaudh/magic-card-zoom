@@ -128,10 +128,10 @@ chrome.runtime.onMessage.addListener(
       case 'activateMagic':
         getCurrentTabId(function(currentTabId) {
           mcz_active_tabs[currentTabId] = {
-            mtgFormat: message.data.mtg_format
+            selectedSets: message.data.selected_sets
           };
           console.log(`mcz_active_tabs (inserted ${currentTabId})`, Object.keys(mcz_active_tabs));
-          indexLoader.load(mtg_sets.expandSets(message.data.mtg_format))
+          indexLoader.load(mtg_sets.expandSets(message.data.selected_sets))
             .then(index => { 
               console.log('index size', Object.keys(index).length);
               console.log('USING cvwrapper in background.js');
