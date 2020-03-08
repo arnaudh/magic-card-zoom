@@ -21,7 +21,8 @@ class IdentifySession {
         }
         let estimatedPotentialCardHeights = this.contourFinder.getPotentialCardHeights(videoImageData, cv_debug);
         let potentialCardHeights = previousMatchCardHeights.concat(estimatedPotentialCardHeights).concat(defaultPotentialCardHeights);
-        potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.ceil(h/2)*2))];
+        // potentialCardHeights = [...new Set(potentialCardHeights.map(h => Math.round(h/2)*2))];
+        potentialCardHeights = [...new Set(potentialCardHeights)];
         // console.log('|previousMatchCardHeights', previousMatchCardHeights);
         // console.log('|estimatedPotentialCardHeights', estimatedPotentialCardHeights);
         // console.log('|defaultPotentialCardHeights', defaultPotentialCardHeights);
