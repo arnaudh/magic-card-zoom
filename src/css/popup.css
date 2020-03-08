@@ -38,11 +38,6 @@ tr.selected img {
     filter: invert(1);
 }
 
-input[type="radio"] {
-    position: fixed;
-    opacity: 0;
-}
-
 .tooltip {
   position: relative;
 }

@@ -28,19 +28,21 @@ chrome.runtime.onMessage.addListener(
                 // HTML_string += '<form id="my-form"  onsubmit="return false;">'
                 var any_checked = false;
 
-                HTML_string += `<div>Please select the correct MtG format for the video:</div>`;
-                HTML_string += `<table class="greyGridTable">`;
-                HTML_string += `<tr>`;
-                HTML_string += `<th></th>`;
-                HTML_string += `<th>Standard</th>`;
-                HTML_string += `<th>Release date</th>`;
-                HTML_string += `<th>Sets included</th>`;
-                HTML_string += `</tr>`;
+                HTML_string += `<div>Please select the pool of cards to use.</div>`;
+
+                HTML_string += `<div>`;
+                HTML_string += `    <div>`;
+                HTML_string += `        <label>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="standard" id="standard-radio">`;
+                HTML_string += `            Standard:`;
+                HTML_string += `            <select id="standard-select">`;
+                HTML_string += `              <option value="default" disabled selected value></option>`;
                 for (let i = 0; i < available_formats.length; i++) {
                     let checked_string = '';
                     let selected_string = '';
                     let asterisk_string = '';
                     let legalSets = available_formats[i].info.sets;
+                    let formatName = available_formats[i].value;
                     let firstSetName = legalSets[0].name;
                     let lastSetName = legalSets[legalSets.length-1].name;
                     let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
@@ -58,39 +60,87 @@ chrome.runtime.onMessage.addListener(
                         asterisk_string += '*';
                     }
                     
-                    if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
-                        lastSetName = `<em>${lastSetName}</em>`;
-                        HTML_string += `<tr id="tr-${i}" class="tooltip ${selected_string}">`;
-                        HTML_string += `<td>`;
-                        HTML_string += `<span class="tooltiptext">`;
-                        let hints = [];
-                        if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
-                        if (isSuggestedBasedOnVideoPublishedDate) { hints.push('publish date'); }
-                        HTML_string += `Suggestion based on the <br>video ${hints.join(' and ')}`;
-                        HTML_string += `</span>`;
-                    } else {
-                        HTML_string += `<tr id="tr-${i}">`;
-                        HTML_string += `<td>`;
-                    }
-                    HTML_string += `<input type="radio" id="radio-${i}" name="mtg_format" value="${available_formats[i].value}" ${checked_string}>`;
-                    HTML_string += `</td>`;
-                    HTML_string += `<td>`;
-                    HTML_string += `${lastSetName}${asterisk_string}`;
-                    HTML_string += `</td>`;
-                    HTML_string += `<td>`;
-                    HTML_string += `${lastSetReleasedAt}`;
-                    HTML_string += `</td>`;
-                    HTML_string += `<td>`;
-                    for (let mtgSet of legalSets) {
-                        let mtgSetCodeSanitized = mtgSet['code'] === 'con' ? '_con' : mtgSet['code']; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
-                        HTML_string += `<img src="assets/images/sets/${mtgSetCodeSanitized}.svg" title="${mtgSet['name']}" class="mtg-set-icon">`;
-                    }
-                    HTML_string += `</td>`;
-                    HTML_string += `</tr>`;
-
+                    // HTML_string += `${lastSetName}${asterisk_string}`;
+                    HTML_string += `<option value="${formatName}" ${selected_string}>${lastSetName}${asterisk_string}</option>`;
                 }
-                HTML_string += `</table>`;
-                HTML_string += '<button id="my-button">Start MagicCardZoom</button>';
+                HTML_string += `            </select>`;
+                HTML_string += `        </input>`;
+                HTML_string += `        </label>`;
+                HTML_string += `    </div>`;
+                HTML_string += `    <div>`;
+                HTML_string += `        <label>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="allsets" id="allsets-radio">`;
+                HTML_string += `            All sets`;
+                HTML_string += `        </input>`;
+                HTML_string += `        </label>`;
+                HTML_string += `    </div>`;
+                HTML_string += `</div>`;
+
+
+
+                // HTML_string += `<table class="greyGridTable">`;
+                // HTML_string += `<tr>`;
+                // HTML_string += `<th></th>`;
+                // HTML_string += `<th>Standard</th>`;
+                // HTML_string += `<th>Release date</th>`;
+                // HTML_string += `<th>Sets included</th>`;
+                // HTML_string += `</tr>`;
+                // for (let i = 0; i < available_formats.length; i++) {
+                //     let checked_string = '';
+                //     let selected_string = '';
+                //     let asterisk_string = '';
+                //     let legalSets = available_formats[i].info.sets;
+                //     let firstSetName = legalSets[0].name;
+                //     let lastSetName = legalSets[legalSets.length-1].name;
+                //     let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
+                //     let isSuggestedBasedOnVideoTitle = false;
+                //     let isSuggestedBasedOnVideoPublishedDate = false;
+                //     if (suggested_format !== null && suggested_format.value === available_formats[i].value) {
+                //         any_checked = true;
+                //         checked_string = 'checked';
+                //         selected_string = 'selected';
+                //         isSuggestedBasedOnVideoTitle = true;
+                //         asterisk_string += '*';
+                //     }
+                //     if (i === lastSetReleasedBeforeVideo) {
+                //         isSuggestedBasedOnVideoPublishedDate = true;
+                //         asterisk_string += '*';
+                //     }
+                    
+                //     if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
+                //         lastSetName = `<em>${lastSetName}</em>`;
+                //         HTML_string += `<tr id="tr-${i}" class="tooltip ${selected_string}">`;
+                //         HTML_string += `<td>`;
+                //         HTML_string += `<span class="tooltiptext">`;
+                //         let hints = [];
+                //         if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
+                //         if (isSuggestedBasedOnVideoPublishedDate) { hints.push('publish date'); }
+                //         HTML_string += `Suggestion based on the <br>video ${hints.join(' and ')}`;
+                //         HTML_string += `</span>`;
+                //     } else {
+                //         HTML_string += `<tr id="tr-${i}">`;
+                //         HTML_string += `<td>`;
+                //     }
+                //     HTML_string += `<input type="radio" id="radio-${i}" name="mtg_format" value="${available_formats[i].value}" ${checked_string}>`;
+                //     HTML_string += `</td>`;
+                //     HTML_string += `<td>`;
+                //     HTML_string += `${lastSetName}${asterisk_string}`;
+                //     HTML_string += `</td>`;
+                //     HTML_string += `<td>`;
+                //     HTML_string += `${lastSetReleasedAt}`;
+                //     HTML_string += `</td>`;
+                //     HTML_string += `<td>`;
+                //     for (let mtgSet of legalSets) {
+                //         let mtgSetCodeSanitized = mtgSet['code'] === 'con' ? '_con' : mtgSet['code']; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
+                //         HTML_string += `<img src="assets/images/sets/${mtgSetCodeSanitized}.svg" title="${mtgSet['name']}" class="mtg-set-icon">`;
+                //     }
+                //     HTML_string += `</td>`;
+                //     HTML_string += `</tr>`;
+
+                // }
+                // HTML_string += `</table>`;
+
+                HTML_string += '<button id="my-button" disabled>Start MagicCardZoom</button>';
                 HTML_string += '<a id="feedback-link" href="https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link">Feedback?</a>';
                 
                 mainDiv.innerHTML = HTML_string;
@@ -109,41 +159,60 @@ chrome.runtime.onMessage.addListener(
                     })();
                 }
 
+                let standardRadio = document.getElementById('standard-radio');
+                let standardSelect = document.getElementById('standard-select');
+                let allSetsRadio = document.getElementById('allsets-radio');
                 let myButton = document.getElementById('my-button');
-                // disable submit until option selected
-                if (! any_checked) {
-                    myButton.disabled = true;
+                if (any_checked) {
+                    standardRadio.checked = true;
+                    myButton.disabled = false;
                 }
 
-                for (var i = 0; i < available_formats.length; i++) {
-                    document.getElementById(`radio-${i}`).onclick = (function() { // Closure function to capture i correctly
-                        let j = i;
-                        return function() {
-                            for (var x = 0; x < available_formats.length; x++) {
-                                document.getElementById(`tr-${x}`).classList.remove("selected");
-                            }
-                            document.getElementById(`tr-${j}`).classList.add("selected");
-                            myButton.disabled = false;
-                            return true;
-                        }
-                    })();
-                    document.getElementById(`tr-${i}`).onclick = (function() { // Closure function to capture i correctly
-                        let j = i;
-                        return function() {
-                            document.getElementById(`radio-${j}`).click();
-                            return true;
-                        }
-                    })();
+                standardSelect.onchange = function() {
+                    standardRadio.checked = true;
                 }
+                standardRadio.onclick = function() {
+                    if (standardSelect.value === 'default') {
+                        return false;
+                    }
+                }
+                standardRadio.onchange = function() {
+                    myButton.disabled = false;
+                }
+                allSetsRadio.onchange = function() {
+                    myButton.disabled = false;
+                }
+
+                // for (var i = 0; i < available_formats.length; i++) {
+                //     document.getElementById(`radio-${i}`).onclick = (function() { // Closure function to capture i correctly
+                //         let j = i;
+                //         return function() {
+                //             for (var x = 0; x < available_formats.length; x++) {
+                //                 document.getElementById(`tr-${x}`).classList.remove("selected");
+                //             }
+                //             document.getElementById(`tr-${j}`).classList.add("selected");
+                //             myButton.disabled = false;
+                //             return true;
+                //         }
+                //     })();
+                //     document.getElementById(`tr-${i}`).onclick = (function() { // Closure function to capture i correctly
+                //         let j = i;
+                //         return function() {
+                //             document.getElementById(`radio-${j}`).click();
+                //             return true;
+                //         }
+                //     })();
+                // }
 
                 myButton.onclick = function() {
                     myButton.disabled = true;
                     myButton.innerText = 'Loading...';
                     const checked_radio = document.querySelector('input[name=mtg_format]:checked');
+                    let mtg_format = (checked_radio.value === 'standard') ? standardSelect.value : 'standard-allthecards';
                     chrome.runtime.sendMessage({
                         messageType: "activateMagic",
                         data: {
-                            mtg_format: checked_radio.value
+                            mtg_format: mtg_format
                         }
                     });
                     return true;
