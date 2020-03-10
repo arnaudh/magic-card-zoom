@@ -52,7 +52,7 @@ let itemNumbers = program.item_numbers && program.item_numbers.split(',').map(Nu
 console.log('itemNumbers', itemNumbers);
 
 // let available_mtg_formats = ['standard-ths'];
-let available_mtg_formats = mtg_sets.allAvailableStandards;
+// let available_mtg_formats = mtg_sets.allAvailableStandards;
 
 let trainingItems = [];
 for (let trainingSubdir of fs.readdirSync(`test/benchmark/dataset`)) {
@@ -72,7 +72,9 @@ for (let trainingSubdir of fs.readdirSync(`test/benchmark/dataset`)) {
         } else if (!video_id) {
             reasonToExclude = `no video id`;
         } else {
-            if (!mtg_format || !available_mtg_formats.includes(mtg_format)) {
+            // if (!mtg_format || !available_mtg_formats.includes(mtg_format)) {
+            //     reasonToExclude = `format ${mtg_format} for video ${video_id} not supported`;
+            if (!mtg_format) {
                 reasonToExclude = `format ${mtg_format} for video ${video_id} not supported`;
             } else if (true_card_id) {
                 let true_mtg_set = true_card_id.split('-')[0];
@@ -131,6 +133,36 @@ function average(arr) {
     return arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 }
 
+// https://stackoverflow.com/questions/16562221/javascript-nested-loops-with-settimeout
+function loopWithCallbak(count, f, done) {
+    var counter = 0;
+    var next = function () {
+        setTimeout(iteration, 0);
+    };
+    var iteration = function () {
+        if (counter >= count) {
+            done && done();
+        } else {
+            f(counter, next);
+        }
+        counter++;
+    }
+    iteration();
+}
+
+// simple timer class
+function Timer() {
+  let start = null;
+  this.reset = function () {
+    start = (new Date()).getTime();
+  };
+  this.get = function () {
+    return (new Date()).getTime() - start;
+  };
+  this.reset();
+};
+
+
 function doTest(cvwrapper) {
     console.log('doTest');
     let identify_services = {}
@@ -145,7 +177,7 @@ function doTest(cvwrapper) {
         if (!includeDuplicateIllustrations) {
             index = mtg_sets.filterOutDuplicateIllustrations(index);
         }
-        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, false);
+        identify_services[mtg_format] = new IdentifyService(identify_service_name, index, cvwrapper, loopWithCallbak);
     }
     let contourFinder = new ContourFinder(cvwrapper);
 
@@ -153,9 +185,13 @@ function doTest(cvwrapper) {
     rimraf.sync(benchmarkDir);
     fs.mkdirsSync(benchmarkDir);
 
-    (async () => {
-        var all_promises = trainingItems.map(item => {
-            // console.log('item', item);
+    let results = [];
+
+    loopWithCallbak(
+        trainingItems.length,
+        function(i, next) {
+            let item = trainingItems[i];
+
             let dir = item.trainingDir
             let true_card_id = item.true_card_id;
             let video_id = item.video_id;
@@ -179,28 +215,41 @@ function doTest(cvwrapper) {
 
             let previousMatches = [];
 
-            return identify_services[mtg_format]
-                .identifyMultiScales(originalImageData, potentialCardHeights, previousMatches, cvDebug)
-                .then(result => {
-                    let {matches: matches, time: time} = result;
-                    let card_identified;
-                    if (matches && matches[0] && matches[0].card_id) {
-                        card_identified = matches[0].card_id;
-                    } else {
-                        card_identified = null;
-                    }
-                    let is_match = isMatch(card_identified, true_card_id);
-                    return {
-                        item: item,
-                        card_identified: card_identified,
-                        is_match: is_match,
-                        debugOutputDir: debugOutputDir,
-                        time: time
-                    };
-                });
-        });
+            const timer = new Timer();
 
-        await Promise.all(all_promises).then(results => {
+
+            identify_services[mtg_format]
+                .identifyMultiScales(
+                    originalImageData,
+                    potentialCardHeights,
+                    previousMatches,
+                    function(result) {
+                        let card_identified;
+                        let time = timer.get();
+                        if (result) {
+                            let matches = result.matches;
+                            if (matches && matches[0] && matches[0].card_id) {
+                                card_identified = matches[0].card_id;
+                            } else {
+                                card_identified = null;
+                            }
+                        } else {
+                            card_identified = null;
+                        }
+                        let is_match = isMatch(card_identified, true_card_id);
+                        results.push({
+                            item: item,
+                            card_identified: card_identified,
+                            is_match: is_match,
+                            debugOutputDir: debugOutputDir,
+                            time: time
+                        });
+                        next();
+                    },
+                    cvDebug
+                );
+        },
+        function done() {
             let resultsFile = `${benchmarkDir}/results.txt`;
             console.log(`\n*** ${resultsFile} ***`);
             results.forEach(result => {
@@ -227,10 +276,8 @@ function doTest(cvwrapper) {
             //         `tail -n +1 ${benchmarkDir}/results.txt ${benchmarkDir}/time_hist.txt ${benchmarkDir}/pos_hist.txt`,
             //         () => {})
             //     )
-        });    
-
-    })();
-
+        }
+    );
 }
 
 console.log('CALLING initialize from benchmark.js');
