@@ -39,6 +39,16 @@ function expandSets (mtg_sets, includeTokens=config.includeTokens) {
         let mtg_sets_to_append;
         if (match) {
             mtg_sets_to_append = getLegalSetsForStandard(match[1]);
+            if (includeTokens) {
+                for (let set_info of allSetsInfo) {
+                    // assumes 1 level of parenting max
+                    if (set_info.parent_set_code &&
+                        mtg_sets_to_append.includes(set_info.parent_set_code) &&
+                        set_info.set_type === "token") {
+                        mtg_sets_to_append.push(set_info.code);
+                    }
+                }
+            }
         } else if (mtg_set == "all") {
             mtg_sets_to_append = allSetsToConsiderInfo.map(info => info.code);
         } else if (mtg_set == "modern") {
