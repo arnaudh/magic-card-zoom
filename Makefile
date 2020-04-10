@@ -9,8 +9,13 @@ download-images-and-metadata:
 index-images:
 	node src/js/util/index_images.js
 
+clean:
+	rm -r build/ || true
+
 build: $(ALL_SOURCES_AND_ASSETS)
-	node src/js/build/build.js
+	node src/js/build/build.js | tee build.log
+	# fail if some files were not located by the copy-webpack-plugin
+	! grep -q 'unable to locate' build.log || (rm -r build/; exit 1)
 	@echo 'Build done: build/'
 
 test:
