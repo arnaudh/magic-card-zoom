@@ -6,14 +6,14 @@ describe('mtg_sets', () => {
             it(`should work with 'standard-xxx'`, (done) => {
                 assert.deepEqual(
                     mtg_sets.expandSets(['standard-ktk']),
-                    [ 'ths', 'bng', 'jou', 'm15', 'ktk', 'tktk', 'tm15', 'tjou', 'tbng', 'tths' ]
+                    [ 'ths', 'bng', 'jou', 'm15', 'ktk', 'tktk', 'tm15', 'tdag', 'tjou', 'tbth', 'tbng', 'tfth', 'tths' ]
                 );
                 done();
             })
             it(`should work with 'without'`, (done) => {
                 assert.deepEqual(
                     mtg_sets.expandSets(['akh', 'ktk', 'm15', 'without', 'akh']),
-                    ['ktk', 'm15', 'tktk', 'tm15']
+                    ['ktk', 'm15']
                 );
                 done();
             })
