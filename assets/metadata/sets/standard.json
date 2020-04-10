@@ -93,5 +93,6 @@
     "war": ["xln", "rix", "dom", "m19", "grn", "rna", "war"],
     "m20": ["xln", "rix", "dom", "m19", "grn", "rna", "war", "m20"],
     "eld": ["grn", "rna", "war", "m20", "eld"],
-    "thb": ["grn", "rna", "war", "m20", "eld", "thb"]
+    "thb": ["grn", "rna", "war", "m20", "eld", "thb"],
+    "iko": ["grn", "rna", "war", "m20", "eld", "thb", "iko"]
 }

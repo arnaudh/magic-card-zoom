@@ -8,9 +8,10 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'thb';
+const latestMtgSet = 'iko';
 const ignoreUnrecognizedSetNames = [
-    'exclusive cards'
+    'exclusive cards',
+    'restricted'
 ];
 
 function downloadStandardInfo() {
@@ -102,7 +103,8 @@ let alternativeNames = {
     '8TH EDITION': 'EIGHTH EDITION',
     '9TH EDITION': 'NINTH EDITION',
     '10TH EDITION': 'TENTH EDITION',
-    'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED'
+    'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED',
+    'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS'
 }
 
 function mtgSetNameToCode(name) {
