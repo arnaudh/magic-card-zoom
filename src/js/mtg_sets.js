@@ -21,12 +21,10 @@ for (let set_info of allAvailableSetsInfo) {
     setsDict[set_info.code] = set_info;
 }
 
-let allAvailableStandards = [];
-for (let availableStandard of config.availableStandards) {
-    allAvailableStandards.push(availableStandard);
-}
+let allAvailableStandards = Object.keys(standardDict).map(x => `standard-${x}`);
 
 function expandSets (mtg_sets, includeTokens=config.includeTokens) {
+    console.log(`expandSets() includeTokens=${includeTokens}, mtg_sets=`, mtg_sets, );
     if (typeof mtg_sets === "string") {
         mtg_sets = [mtg_sets];
     }
@@ -62,6 +60,7 @@ function expandSets (mtg_sets, includeTokens=config.includeTokens) {
             actual_mtg_sets.push(...mtg_sets_to_append);
         }
     }
+    console.log('expandSets() -> actual_mtg_sets=',actual_mtg_sets);
     return actual_mtg_sets;
 }
 

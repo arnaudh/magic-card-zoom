@@ -3,6 +3,7 @@ const config = require("../../../config.json");
 const mtg_sets = require('../mtg_sets.js');
 
 module.exports.load = async function(mtgSets) {
+    console.log(`Index loader loading ${mtgSets.length} sets:`, mtgSets);
     return await Promise.all(mtgSets.map(s => {
             let sanitizedSet = s === 'con' ? '_con' : s; // Workaround to Chrome not accepting con.* files (https://chromium.googlesource.com/chromium/src/+/refs/tags/57.0.2958.1/net/base/filename_util.cc#157)
             return fetch(`assets/indexes/${sanitizedSet}.json`);

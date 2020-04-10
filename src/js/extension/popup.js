@@ -26,16 +26,16 @@ chrome.runtime.onMessage.addListener(
                 var any_selected = false;
                 
                 let HTML_string = '';
-                HTML_string += `<div>Please select the pool of cards to use &mdash; a smaller pool gives better results.</div>`;
+                HTML_string += `<div>Please select the pool of cards to use; a smaller pool gives better results.</div>`;
                 HTML_string += `<div id="radios-div">`;
                 HTML_string += `    <div>`;
                 HTML_string += `        <label>`;
                 HTML_string += `        <input type="radio" name="mtg_format" value="standard" id="standard-radio">`;
-                HTML_string += `            Standard:`;
+                // HTML_string += `            Standard:`;
                 HTML_string += `        </input>`;
                 HTML_string += `        </label>`;
                 HTML_string += `            <select id="standard-select">`;
-                HTML_string += `              <option value="default" disabled selected value></option>`;
+                HTML_string += `              <option value="default" disabled selected value>Standard:</option>`;
                 for (let i = 0; i < available_formats.length; i++) {
                     let checked_string = '';
                     let selected_string = '';
@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener(
                         isSuggestedBasedOnVideoTitle = true;
                         asterisk_string += '*';
                     }
-                    HTML_string += `<option value="${formatName}" ${selected_string}>${asterisk_string}${lastSetName}${asterisk_string}`;
+                    HTML_string += `<option value="${formatName}" ${selected_string}>Standard: ${asterisk_string}${lastSetName}${asterisk_string}`;
                     if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
                         let hints = [];
                         if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
@@ -85,7 +85,7 @@ chrome.runtime.onMessage.addListener(
                 HTML_string += `    </div>`;
                 HTML_string += `    <div>`;
                 HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="allsets" id="allsets-radio">`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="all" id="allsets-radio">`;
                 HTML_string += `            All sets`;
                 HTML_string += `        </input>`;
                 HTML_string += `        </label>`;
@@ -126,6 +126,14 @@ chrome.runtime.onMessage.addListener(
                 let myButton = document.getElementById('my-button');
                 let selectedSets = [];
 
+                let getSelectedPool = function() {
+                    const checked_radio = document.querySelector('input[name=mtg_format]:checked');
+                    if (checked_radio.value === 'standard') {
+                        return standardSelect.value;
+                    } else {
+                        return checked_radio.value;
+                    }
+                }
                 let getSelectedSets = function() {
                     let selectedSets;
                     const checked_radio = document.querySelector('input[name=mtg_format]:checked');
@@ -176,7 +184,7 @@ chrome.runtime.onMessage.addListener(
                     chrome.runtime.sendMessage({
                         messageType: "activateMagic",
                         data: {
-                            selected_sets: getSelectedSets()
+                            selected_pool: getSelectedPool() 
                         }
                     });
                     return true;
