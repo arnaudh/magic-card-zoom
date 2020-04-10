@@ -11,7 +11,7 @@ let allAvailableSetsInfo = allSetsInfo.filter(function(info) {
         // Chronicles is a 'masters' set but still was part of Standard (https://en.wikipedia.org/wiki/Magic:_The_Gathering_compilation_sets#Chronicles)
         return true;
     } else {
-        return ["core", "expansion", "token"].includes(info.set_type);
+        return ["core", "expansion", "token", "commander"].includes(info.set_type);
     }
 });
 let allAvailableSets = allAvailableSetsInfo.map(info => info.code);
@@ -30,10 +30,11 @@ function expandSets (mtg_sets, includeTokens=config.includeTokens) {
     }
     let actual_mtg_sets = [];
     let without = false;
-    let allSetsToConsiderInfo = allAvailableSetsInfo;
+    let allSetsToConsider = allAvailableSetsInfo;
     if (!includeTokens) {
-        allSetsToConsiderInfo = allSetsToConsiderInfo.filter(info => info.set_type !== "token");
+        allSetsToConsider = allSetsToConsider.filter(info => info.set_type !== "token");
     }
+    let allSetsToConsiderWithoutCommander = allSetsToConsider.filter(info => info.block !== "Commander");
     for (let mtg_set of mtg_sets) {
         let match = /^standard-(.+)$/.exec(mtg_set);
         let mtg_sets_to_append;
@@ -49,12 +50,14 @@ function expandSets (mtg_sets, includeTokens=config.includeTokens) {
                     }
                 }
             }
-        } else if (mtg_set == "all") {
-            mtg_sets_to_append = allSetsToConsiderInfo.map(info => info.code);
-        } else if (mtg_set == "modern") {
-            mtg_sets_to_append = allSetsSince(allSetsToConsiderInfo, '8ed');
         } else if (mtg_set == "pioneer") {
-            mtg_sets_to_append = allSetsSince(allSetsToConsiderInfo, 'rtr');
+            mtg_sets_to_append = allSetsSince(allSetsToConsiderWithoutCommander, 'rtr');
+        } else if (mtg_set == "modern") {
+            mtg_sets_to_append = allSetsSince(allSetsToConsiderWithoutCommander, '8ed');
+        } else if (mtg_set == "vintage") {
+            mtg_sets_to_append = allSetsToConsiderWithoutCommander.map(info => info.code);
+        } else if (mtg_set == "commander" || mtg_set == "all") {
+            mtg_sets_to_append = allSetsToConsider.map(info => info.code);
         } else if (mtg_set == "without") {
             without = true;
             continue;
@@ -74,10 +77,10 @@ function expandSets (mtg_sets, includeTokens=config.includeTokens) {
     return actual_mtg_sets;
 }
 
-function allSetsSince(allSetsToConsiderInfo, code) {
-    let index = allSetsToConsiderInfo.findIndex(info => info.code === code);
-    // Assumes allSetsToConsiderInfo are ordered from most recent to oldest
-    return allSetsToConsiderInfo.map(info => info.code).slice(0, index+1);
+function allSetsSince(setsInfo, code) {
+    let index = setsInfo.findIndex(info => info.code === code);
+    // Assumes setsInfo are ordered from most recent to oldest
+    return setsInfo.map(info => info.code).slice(0, index+1);
 }
 
 function getLegalSetsForStandard(mtg_set) {
@@ -90,6 +93,24 @@ function getMtgSetName(code) {
 
 function getMtgSetIconUrl(code) {
     return setsDict[code].icon_svg_uri;
+}
+
+function inferMtgFormatFromText(text) {
+    let potentialMtgStandard = findMtgStandardInText(text);
+    let textLower = text.toLowerCase();
+    if (potentialMtgStandard) {
+        return potentialMtgStandard;
+    } else if (textLower.includes("commander")) {
+        return "commander";
+    } else if (textLower.includes("vintage")) {
+        return "vintage";
+    } else if (textLower.includes("modern")) {
+        return "modern";
+    } else if (textLower.includes("pioneer")) {
+        return "pioneer";
+    } else {
+        return null;
+    }     
 }
 
 function findMtgStandardInText(text) {
@@ -167,7 +188,7 @@ module.exports.allAvailableStandards = allAvailableStandards;
 module.exports.getMtgSetName = getMtgSetName;
 module.exports.getMtgSetIconUrl = getMtgSetIconUrl;
 module.exports.getStandardInfo = getStandardInfo;
-module.exports.findMtgStandardInText = findMtgStandardInText;
+module.exports.inferMtgFormatFromText = inferMtgFormatFromText;
 module.exports.filterOutBasicLands = filterOutBasicLands;
 module.exports.filterOutDuplicateIllustrations = filterOutDuplicateIllustrations;
 

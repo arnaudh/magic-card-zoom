@@ -109,14 +109,13 @@ chrome.runtime.onMessage.addListener(
             };
           })
           availableFormats.reverse();
-          let potentialMtgStandard = mtg_sets.findMtgStandardInText(currentTab.title);
-          let suggested_format = potentialMtgStandard ? {'value': potentialMtgStandard} : null;
+          let suggestedFormat = mtg_sets.inferMtgFormatFromText(currentTab.title);
           chrome.runtime.sendMessage({
             messageType: "popupShowAvailableFormats",
             createdAt: new Date().toISOString(),
             data: {
               'available_formats': availableFormats,
-              'suggested_format': suggested_format,
+              'suggested_format': suggestedFormat,
               'video_publish_date': message.data.videoPublishDate,
               'status': 'success',
               'available_action': 'turn-on'

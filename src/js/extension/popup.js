@@ -23,7 +23,7 @@ chrome.runtime.onMessage.addListener(
                     return isSetReleasedBeforeVideo
                 });
 
-                var any_selected = false;
+                var any_standard_selected = false;
                 
                 let HTML_string = '';
                 HTML_string += `<div>Please select the pool of cards to use; a smaller pool gives better results.</div>`;
@@ -35,9 +35,8 @@ chrome.runtime.onMessage.addListener(
                 HTML_string += `        </input>`;
                 HTML_string += `        </label>`;
                 HTML_string += `            <select id="standard-select">`;
-                HTML_string += `              <option value="default" disabled selected value>Standard:</option>`;
+                HTML_string += `              <option value="default" disabled selected value>Standard</option>`;
                 for (let i = 0; i < available_formats.length; i++) {
-                    let checked_string = '';
                     let selected_string = '';
                     let asterisk_string = '';
                     let legalSets = available_formats[i].info.sets;
@@ -51,9 +50,8 @@ chrome.runtime.onMessage.addListener(
                         isSuggestedBasedOnVideoPublishedDate = true;
                         asterisk_string += '*';
                     }
-                    if (suggested_format !== null && suggested_format.value === available_formats[i].value) {
-                        any_selected = true;
-                        checked_string = 'checked';
+                    if (suggested_format === available_formats[i].value) {
+                        any_standard_selected = true;
                         selected_string = 'selected';
                         isSuggestedBasedOnVideoTitle = true;
                         asterisk_string += '*';
@@ -71,23 +69,26 @@ chrome.runtime.onMessage.addListener(
                 HTML_string += `    </div>`;
                 HTML_string += `    <div>`;
                 HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="pioneer" id="pioneer-radio">`;
-                HTML_string += `            Pioneer`;
-                HTML_string += `        </input>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="pioneer" id="pioneer-radio"/>`;
+                HTML_string += `        Pioneer`;
                 HTML_string += `        </label>`;
                 HTML_string += `    </div>`;
                 HTML_string += `    <div>`;
                 HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="modern" id="modern-radio">`;
-                HTML_string += `            Modern`;
-                HTML_string += `        </input>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="modern" id="modern-radio"/>`;
+                HTML_string += `        Modern`;
                 HTML_string += `        </label>`;
                 HTML_string += `    </div>`;
                 HTML_string += `    <div>`;
                 HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="all" id="allsets-radio">`;
-                HTML_string += `            All sets`;
-                HTML_string += `        </input>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="vintage" id="vintage-radio"/>`;
+                HTML_string += `        Vintage`;
+                HTML_string += `        </label>`;
+                HTML_string += `    </div>`;
+                HTML_string += `    <div>`;
+                HTML_string += `        <label>`;
+                HTML_string += `        <input type="radio" name="mtg_format" value="commander" id="commander-radio"/>`;
+                HTML_string += `        Commander`;
                 HTML_string += `        </label>`;
                 HTML_string += `    </div>`;
                 HTML_string += `</div>`;
@@ -122,7 +123,8 @@ chrome.runtime.onMessage.addListener(
                 let standardSelect = document.getElementById('standard-select');
                 let modernRadio = document.getElementById('modern-radio');
                 let pioneerRadio = document.getElementById('pioneer-radio');
-                let allSetsRadio = document.getElementById('allsets-radio');
+                let vintageRadio = document.getElementById('vintage-radio');
+                let commanderRadio = document.getElementById('commander-radio');
                 let myButton = document.getElementById('my-button');
                 let selectedSets = [];
 
@@ -139,17 +141,14 @@ chrome.runtime.onMessage.addListener(
                     const checked_radio = document.querySelector('input[name=mtg_format]:checked');
                     if (checked_radio.value === 'standard') {
                         selectedSets = mtg_sets.expandSets(standardSelect.value);
-                    } else if (checked_radio.value === 'modern') {
-                        selectedSets = mtg_sets.expandSets('modern');
-                    } else if (checked_radio.value === 'pioneer') {
-                        selectedSets = mtg_sets.expandSets('pioneer');
                     } else {
-                        selectedSets = mtg_sets.expandSets('all');
+                        selectedSets = mtg_sets.expandSets(checked_radio.value);
                     }
                     console.log('getSelectedSets', selectedSets);
                     return selectedSets;
                 }
                 let radioChange = function() {
+                    console.log('radioChange()');
                     myButton.disabled = false;
                     let selectedSets = getSelectedSets().map(code => `icon-${code}`);
                     for (let icon of document.getElementsByClassName('mtg-set-icon')) {
@@ -163,7 +162,8 @@ chrome.runtime.onMessage.addListener(
                 standardRadio.onchange = radioChange;
                 modernRadio.onchange = radioChange;
                 pioneerRadio.onchange = radioChange;
-                allSetsRadio.onchange = radioChange;
+                vintageRadio.onchange = radioChange;
+                commanderRadio.onchange = radioChange;
 
                 standardSelect.onchange = function() {
                     standardRadio.checked = true;
@@ -174,8 +174,16 @@ chrome.runtime.onMessage.addListener(
                         return false;
                     }
                 }
-                if (any_selected) {
-                    standardSelect.onchange();
+                if (suggested_format) {
+                    if (any_standard_selected) {
+                        standardSelect.onchange();
+                    } else {
+                        let radio = document.getElementById(`${suggested_format}-radio`);
+                        let oldText = radio.nextSibling.textContent.trim();
+                        radio.nextSibling.textContent = ` *${oldText}* (based on the video title)`;
+                        radio.checked = true;
+                        radioChange();
+                    }
                 }
 
                 myButton.onclick = function() {
