@@ -9,12 +9,15 @@ MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards
 The extension can be installed directly from the [Chrome Web Store](https://chrome.google.com/webstore/detail/magic-card-zoom/cphkchmjhpgjajfogfkolbgageciokda).
 
 <!--- Detailed Description for the Web Store
-
 Chrome extension to identify Magic: The Gathering™ cards in videos and streams. Simply hover your mouse over any card to get a high definition visual.
 
 === Updates ===
+[2020-05-01] Version 3.1
+- Add the Modern Masters and Modern Horizons sets to the Modern format
 [2020-04-10] Version 3.0
-- Expanded the list of cards to include all cards ever printed! You can now choose formats such as Pioneer, Modern, Vintage or Commander, in addition to the Standard formats. This was made possible by optimizing the detection algorithms and refactoring the extension's messaging system. Please keep in mind that a smaller pool of cards gives faster and more accurate results, so it is advised to choose the smallest pool of cards necessary for a given game.
+- Expanded the list of cards to include all cards ever printed!
+You can now choose formats such as Pioneer, Modern, Vintage or Commander, in addition to the Standard formats. This was made possible by optimizing the detection algorithms and refactoring the extension's internal messaging system. Please keep in mind that a smaller pool of cards gives faster and more accurate results, so pick a smaller pool when possible.
+- Added Ikoria: Lair of Behemoths set
 [2020-01-14] Version 2.0.3
 - Added Theros Beyond Death set
 [2019-11-11] Version 2.0.2
@@ -28,13 +31,14 @@ Chrome extension to identify Magic: The Gathering™ cards in videos and streams
 1. Install the extension
 2. Go to a video/stream showing a game of Magic (e.g. https://youtu.be/cKPaR2uSpPk?t=222)
 3. Click on the extension icon in the top right corner of the browser
-4. Select the appropriate Standard pool of cards (best guess will be selected by default), then click on "Start MagicCardZoom"
-5. Hover your mouse over any card in the video to get a high definition visual of the card
+4. Select the appropriate pool of cards for the game (best guess will be selected by default), then click on "Start MagicCardZoom"
+5. Hover your mouse over any card in the video to get a high definition visual of the card (works best when hovering over the card's art)
 
 To stop running the extension, click on the extension icon, then click on "Stop MagicCardZoom". The extension will also stop when closing the tab or navigating to a new page.
 
 === Limitations ===
 Identification of the correct card depends on how recognisable the card's artwork is, therefore strong light reflection or obstructions (e.g. by dice or other cards) will cause some cards to not be identified.
+Also keep in mind that the number of cards in the pool has a direct impact on the accuracy of the detection, therefore the extension will work better on smaller formats such as Standard or Pioneer as opposed to larger formats such as Modern, Vintage or Commander.
 
 === Feedback / contribute ===
 Please submit any feedback, questions or issues you have to magiccardzoom@gmail.com, or use the feedback link in the extension popup.
