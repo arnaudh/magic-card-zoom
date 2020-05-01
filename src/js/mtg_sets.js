@@ -1,86 +1,104 @@
 const standardDict = require("../../assets/metadata/sets/standard.json");
-const allSetsInfo = require("../../assets/metadata/sets/sets.json");
 const config = require("../../config.json");
+const allSetsInfoUnsorted = require("../../assets/metadata/sets/sets.json");
 
-// Available sets = core, expansion & token sets (with a few exceptions)
-let allAvailableSetsInfo = allSetsInfo.filter(function(info) {
+// Sort by release date ascending
+const allSetsInfo = allSetsInfoUnsorted.sort((a, b) => new Date(a.released_at) - new Date(b.released_at));
+
+let allSetsInfoDict = {};
+for (let set_info of allSetsInfo) {
+    allSetsInfoDict[set_info.code] = set_info;
+}
+
+let coreExpansionSetsInfo = allSetsInfo.filter(function(info) {
     if (["fbb", "4bb" ,"sum"].includes(info.code)) {
-        // these 'core' sets are special reprints of other sets
+        // these 'core' sets are actually special reprints of other sets
         return false;
-    } else if(info.code === 'chr') {
-        // Chronicles is a 'masters' set but still was part of Standard (https://en.wikipedia.org/wiki/Magic:_The_Gathering_compilation_sets#Chronicles)
-        return true;
     } else {
-        return ["core", "expansion", "token", "commander"].includes(info.set_type);
+        return ["core", "expansion"].includes(info.set_type);
     }
 });
-let allAvailableSets = allAvailableSetsInfo.map(info => info.code);
 
-let setsDict = {};
-for (let set_info of allAvailableSetsInfo) {
-    setsDict[set_info.code] = set_info;
-}
+let modernHorizonsSet = allSetsInfoDict['mh1'];
+let modernMastersSets = allSetsInfo.filter(info => info.set_type === "masters" && info.name.includes("Modern Masters"));
+let commanderSets = allSetsInfo.filter(info => info.set_type === "commander" && !info.name.includes("Tokens"));
+
+let allAvailableSets = expandSets("all_sets");
 
 let allAvailableStandards = Object.keys(standardDict).map(x => `standard-${x}`);
 
-function expandSets (mtg_sets, includeTokens=config.includeTokens) {
-    console.log(`expandSets() includeTokens=${includeTokens}, mtg_sets=`, mtg_sets, );
-    if (typeof mtg_sets === "string") {
-        mtg_sets = [mtg_sets];
+function expandSets(mtg_sets_or_formats, includeTokens=config.includeTokens) {
+    // console.log(`expandSets() includeTokens=${includeTokens}, mtg_sets_or_formats=`, mtg_sets_or_formats, );
+    if (mtg_sets_or_formats == "all_sets") {
+        mtg_sets_or_formats = ["commander", "modern"];
     }
-    let actual_mtg_sets = [];
-    let without = false;
-    let allSetsToConsider = allAvailableSetsInfo;
-    if (!includeTokens) {
-        allSetsToConsider = allSetsToConsider.filter(info => info.set_type !== "token");
+    if (typeof mtg_sets_or_formats === "string") {
+        mtg_sets_or_formats = [mtg_sets_or_formats];
     }
-    let allSetsToConsiderWithoutCommander = allSetsToConsider.filter(info => info.block !== "Commander");
-    for (let mtg_set of mtg_sets) {
-        let match = /^standard-(.+)$/.exec(mtg_set);
-        let mtg_sets_to_append;
-        if (match) {
-            mtg_sets_to_append = getLegalSetsForStandard(match[1]);
+    let actual_mtg_sets_infos = [];
+    for (let mtg_set_or_format of mtg_sets_or_formats) {
+        if (mtg_set_or_format in allSetsInfoDict) {
+            actual_mtg_sets_infos.push(allSetsInfoDict[mtg_set_or_format]);
+        } else {
+            let match = /^standard-(.+)$/.exec(mtg_set_or_format);
+            let mtg_set_infos_to_append;
+            if (match) {
+                let legalSets = getLegalSetsForStandard(match[1]);
+                mtg_set_infos_to_append = allSetsInfo.filter(info => legalSets.includes(info.code));
+            } else if (mtg_set_or_format == "pioneer") {
+                mtg_set_infos_to_append = coreExpansionSetsSince('rtr');
+            } else if (mtg_set_or_format == "modern") {
+                // According to https://mtg.gamepedia.com/Modern, the following sets are legal in Modern:
+                // - Cards from all regular core sets and expansions since Eighth Edition
+                // - Timeshifted cards in Time Spiral (included in the expansion sets above since set_type is 'expansion' and release date > release date of Eight Edition)
+                // - Planeswalker decks (included in the expansion sets above, e.g. "Vraska, Regal Gorgon" is in grn.json, with collector number 269 out of 259)
+                // - Buy-a-Box promos (included in the expansion sets above, e.g. "Firesong and Sunspeaker" is in dom.json, with collector number 280 out of 269)
+                // - Modern Horizons 2019
+                // - The Modern Masters series
+                mtg_set_infos_to_append = coreExpansionSetsSince('8ed').concat(modernHorizonsSet).concat(modernMastersSets);
+            } else if (mtg_set_or_format == "vintage") {
+                mtg_set_infos_to_append = coreExpansionSetsInfo.slice(); // slice to clone
+            } else if (mtg_set_or_format == "commander") {
+                mtg_set_infos_to_append = coreExpansionSetsInfo.slice().concat(commanderSets); // slice to clone
+            } else {
+                throw `Unknown mtg_set_or_format "${mtg_set_or_format}"`;
+            }
+
             if (includeTokens) {
+                let parent_codes = mtg_set_infos_to_append.map(info => info.code);
                 for (let set_info of allSetsInfo) {
-                    // assumes 1 level of parenting max
-                    if (set_info.parent_set_code &&
-                        mtg_sets_to_append.includes(set_info.parent_set_code) &&
-                        set_info.set_type === "token") {
-                        mtg_sets_to_append.push(set_info.code);
+                    if (set_info.set_type === "token" &&
+                        set_info.parent_set_code &&
+                        parent_codes.includes(set_info.parent_set_code)) {
+                        mtg_set_infos_to_append.push(set_info);
                     }
                 }
             }
-        } else if (mtg_set == "pioneer") {
-            mtg_sets_to_append = allSetsSince(allSetsToConsiderWithoutCommander, 'rtr');
-        } else if (mtg_set == "modern") {
-            mtg_sets_to_append = allSetsSince(allSetsToConsiderWithoutCommander, '8ed');
-        } else if (mtg_set == "vintage") {
-            mtg_sets_to_append = allSetsToConsiderWithoutCommander.map(info => info.code);
-        } else if (mtg_set == "commander" || mtg_set == "all") {
-            mtg_sets_to_append = allSetsToConsider.map(info => info.code);
-        } else if (mtg_set == "without") {
-            without = true;
-            continue;
-        } else if (allAvailableSets.includes(mtg_set)) {
-            mtg_sets_to_append = [mtg_set]
-        } else {
-            throw `Unknown mtg_set ${mtg_set}`;
-        }
 
-        if (without) {
-            actual_mtg_sets = difference(actual_mtg_sets, mtg_sets_to_append);
-        } else {
-            actual_mtg_sets.push(...mtg_sets_to_append);
+            actual_mtg_sets_infos.push(...mtg_set_infos_to_append);
         }
     }
-    console.log('expandSets() -> actual_mtg_sets=',actual_mtg_sets);
-    return actual_mtg_sets;
+    
+    let actual_mtg_sets_infos_unique = unique(actual_mtg_sets_infos);
+    // Sort by released date asc, token sets after core sets if same release date
+    let actual_mtg_sets_infos_sorted = actual_mtg_sets_infos_unique.sort(function compareFunction(a, b) {
+        let res = new Date(a.released_at) - new Date(b.released_at);
+        if (res === 0) {
+            if (a.name.includes("Token")) {
+                return 1;
+            } else if (b.name.includes("Token")) {
+                return -1;
+            }
+        }
+        return res;
+    });
+    // console.log('expandSets() -> actual_mtg_sets=',actual_mtg_sets);
+    return actual_mtg_sets_infos_sorted.map(info => info.code);
 }
 
-function allSetsSince(setsInfo, code) {
-    let index = setsInfo.findIndex(info => info.code === code);
-    // Assumes setsInfo are ordered from most recent to oldest
-    return setsInfo.map(info => info.code).slice(0, index+1);
+function coreExpansionSetsSince(code) {
+    let releasedAt = allSetsInfoDict[code].released_at;
+    return coreExpansionSetsInfo.filter(info => info.released_at >= releasedAt);
 }
 
 function getLegalSetsForStandard(mtg_set) {
@@ -88,11 +106,11 @@ function getLegalSetsForStandard(mtg_set) {
 }
 
 function getMtgSetName(code) {
-    return setsDict[code].name;
+    return allSetsInfoDict[code].name;
 }
 
 function getMtgSetIconUrl(code) {
-    return setsDict[code].icon_svg_uri;
+    return allSetsInfoDict[code].icon_svg_uri;
 }
 
 function inferMtgFormatFromText(text) {
@@ -115,7 +133,7 @@ function inferMtgFormatFromText(text) {
 
 function findMtgStandardInText(text) {
     let textUpper = text.toUpperCase();
-    for (const [code, set_info] of Object.entries(setsDict)) {
+    for (const [code, set_info] of Object.entries(allSetsInfoDict)) {
         if (allAvailableStandards.includes(`standard-${code}`)) {
             let mtgSetName = set_info.name.toUpperCase();
             if (textUpper.includes(mtgSetName)) {
@@ -132,7 +150,7 @@ function getStandardInfo(standard) {
     if (match) {
         let legalSets = getLegalSetsForStandard(match[1]);
         return {
-            'sets': legalSets.map(code => setsDict[code])
+            'sets': legalSets.map(code => allSetsInfoDict[code])
         };
     } else {
         throw Error(`standard "${standard}" was not of the form "standard-xxx"`);
