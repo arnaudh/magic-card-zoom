@@ -14,6 +14,9 @@ let coreExpansionSetsInfo = allSetsInfo.filter(function(info) {
     if (["fbb", "4bb" ,"sum"].includes(info.code)) {
         // these 'core' sets are actually special reprints of other sets
         return false;
+    } else if (info.code === 'tjmp') {
+        // work around Scryfall bug which refers to non-existent set (Jumpstart doesn't have tokens)
+        return false;
     } else {
         return ["core", "expansion"].includes(info.set_type);
     }
