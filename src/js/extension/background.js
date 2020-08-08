@@ -17,7 +17,6 @@ require('../core/opencvjs_wrapper.js').initialize(function(cvwrapper_){
 
 const indexLoader = require('./index_loader.js');
 const IdentifySession = require('../core/identify_session.js');
-const DisplayService = require('./display_service.js');
 const mtg_sets = require('../mtg_sets.js');
 const config = require('../../../config.json');
 
@@ -361,6 +360,18 @@ function cropImage2(dataUrl, boundingRect1, boundingRect2, callback) {
   sourceImage.src = dataUrl;
 }
 
+
+// Using Scryfall card API (https://scryfall.com/docs/api/cards/collector)
+// example for a two-faced card:
+//   xln-90_1 -> https://api.scryfall.com/cards/xln/90?format=image&version=normal
+//   xln-90_2 -> https://api.scryfall.com/cards/xln/90?format=image&version=normal&face=back
+function cardImageUrl(card_id) {
+    let [, mtg_set, collector_number, face_number] = card_id.match(/^(.+)-(.+?)(_\d)?$/);
+    let face_parameter = (face_number == "_2") ? "&face=back" : "";
+    let url = `https://api.scryfall.com/cards/${mtg_set}/${collector_number}?format=image&version=normal${face_parameter}`;
+    return url;
+}
+
 function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights, messageID, tabId, sendResponse, timer) {
   if (checkMessageOutdated(messageID, 'after getCurrentTabId')) return;
   // mcz_active_tabs[tabId].identifySession.identify(imageData1, imageData2, potentialCardHeights, timer)
@@ -378,7 +389,7 @@ function identify_query_in_frontend(imageData1, imageData2, potentialCardHeights
         lastCardId = card_id;
         response = {
           card: {
-            image_url: DisplayService.getDisplayUrl(card_id)
+            image_url: cardImageUrl(card_id)
           },
           status: 'success',
           messageID: messageID,

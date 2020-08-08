@@ -7,7 +7,6 @@ const Promise = require('bluebird');
 Promise.promisifyAll(fs);
 
 const LOCAL_CARDS_METADATA_DIR = 'assets/metadata/cards/full';
-const LOCAL_CARDS_DISPLAY_URLS_DIR = 'assets/metadata/cards/display_urls';
 const LOCAL_CARD_IMAGES_DIR = 'assets/images/cards';
 const LOCAL_SET_IMAGES_DIR = 'assets/images/sets';
 
@@ -33,7 +32,6 @@ function downloadImagesAndMetadata() {
             .then(() => downloadIconForSet(mtgSet, mtg_sets.getMtgSetIconUrl(mtgSet)))
             .then(() => downloadCardsMetadata(mtgSet))
             .then(() => downloadCardImagesForSet(mtgSet, INDEX_IMAGE_TYPE))
-            .then(() => generateCardsDisplayUrlsForSet(mtgSet, DISPLAY_IMAGE_TYPE))
     }
     chain = chain
         .then(generateDuplicateIllustrationsDictionnary)
@@ -81,24 +79,6 @@ function downloadCardImagesForSet(mtgSet, imageType) {
         })
 }
 
-function generateCardsDisplayUrlsForSet(mtgSet, imageType) {
-    let localFilename = `${LOCAL_CARDS_DISPLAY_URLS_DIR}/${mtgSet}.json`;
-    if (checkAlreadyDownloaded(localFilename)) {
-        return;
-    }
-    console.log(`Generating display urls for ${mtgSet}`);
-    return ioTools.readJsonAsync(`${LOCAL_CARDS_METADATA_DIR}/${mtgSet}.json`)
-        .then(function(items) {
-            let metadataDict = {};
-            items.forEach(item => {
-                getSidesIdAndUrl(item, imageType).forEach(([sideId, imageUrl]) => {
-                    metadataDict[`${mtgSet}-${sideId}`] = imageUrl;
-                });
-            });
-            ioTools.writePrettyJsonToFile(metadataDict, localFilename);
-        })
-}
-
 function downloadImagesForItem(item, mtgSet, imageType) {
     let sides = getSidesIdAndUrl(item, imageType);
     let localDir = `${LOCAL_CARD_IMAGES_DIR}/${imageType}/${mtgSet}`;
@@ -117,8 +97,9 @@ function downloadImagesForItem(item, mtgSet, imageType) {
     return chain;
 }
 
-// Note: beware of special case collector numbers "250a", also "S2" (https://scryfall.com/card/8ed/S2/vengeance)
-// eg: https://scryfall.com/search?q=cn%3A250a&unique=cards&as=grid&order=name
+// Note: beware of special case collector numbers, e.g.:
+// - "250a" (https://scryfall.com/card/bfz/250a/plains)
+// - "S2" (https://scryfall.com/card/8ed/S2/vengeance)
 function getSidesIdAndUrl(item, imageType) {
     let imageUrls;
     if (item.image_uris) {
