@@ -12,6 +12,11 @@ The extension can be installed directly from the [Chrome Web Store](https://chro
 Chrome extension to identify Magic: The Gathering™ cards in videos and streams. Simply hover your mouse over any card to get a high definition visual.
 
 === Updates ===
+[2020-08-09] Version 3.1.1
+- Use simpler Scryfall API to render cards
+- Add Core Set 2021 set
+[2020-05-01] Version 3.1
+- Add the Modern Masters and Modern Horizons sets to the Modern format
 [2020-04-10] Version 3.0
 - Expanded the list of cards to include all cards ever printed!
 You can now choose formats such as Pioneer, Modern, Vintage or Commander, in addition to the Standard formats. This was made possible by optimizing the detection algorithms and refactoring the extension's internal messaging system. Please keep in mind that a smaller pool of cards gives faster and more accurate results, so pick a smaller pool when possible.
@@ -53,10 +58,10 @@ See [this page](./doc/How_it_works.md) for an explanation of how it works.
 
 ## Contributing
 
-Please submit any feedback, issues, or feature requests you have using [GitHub issues](/../../issues) or using [this quick feedback link](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link).
+Please submit any feedback, issues, or feature requests you have using [GitHub issues](/../../issues) or [this quick feedback link](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link), or by sending an email to magiccardzoom@gmail.com.
 
-Also, you are more than welcome to contribute directly to this repository!
-To do so, fork it, make some changes and submit a pull request.
+Also, you are more than welcome to contribute to this repository!
+Please first open an issue (or send an email) so we can discuss the approach and I can help you get setup.
 
 ## Setup
 
@@ -139,7 +144,9 @@ The extension should now be loaded and ready to use.
 
 After making changes to the code, re-build and then click the refresh button on the extensions page. If you have modified the feature descriptors used to identify images, you will need to re-run the indexing before building again.
 
-### Adding a new _Magic: the Gathering™_ set
+## Adding a new _Magic: the Gathering™_ set
+
+> Note: this section is out of date
 
 The following steps need to be done whenever a new set is released.
 
