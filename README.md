@@ -12,8 +12,6 @@ The extension can be installed directly from the [Chrome Web Store](https://chro
 Chrome extension to identify Magic: The Gathering™ cards in videos and streams. Simply hover your mouse over any card to get a high definition visual.
 
 === Updates ===
-[2020-05-01] Version 3.1
-- Add the Modern Masters and Modern Horizons sets to the Modern format
 [2020-04-10] Version 3.0
 - Expanded the list of cards to include all cards ever printed!
 You can now choose formats such as Pioneer, Modern, Vintage or Commander, in addition to the Standard formats. This was made possible by optimizing the detection algorithms and refactoring the extension's internal messaging system. Please keep in mind that a smaller pool of cards gives faster and more accurate results, so pick a smaller pool when possible.
