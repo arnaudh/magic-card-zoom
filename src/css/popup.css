@@ -20,6 +20,7 @@ select {
 
 #main-div > div {
     margin-bottom: 14px;
+    min-width: 320px;
 }
 
 #selected-sets-label {

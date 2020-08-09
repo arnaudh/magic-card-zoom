@@ -3,6 +3,14 @@ console.log('popup.js');
 const mtg_sets = require('../mtg_sets.js');
 import "../../css/popup.css";
 
+function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function parse_date(string) {
+    return new Date(Date.parse(string));
+}
+
 chrome.runtime.onMessage.addListener(
     function(message, sender, sendResponse) {
         console.log(`===> popup RECEIVE [${message.messageID}] ${message.messageType} @ ${new Date().toISOString()}`, message);
@@ -14,13 +22,18 @@ chrome.runtime.onMessage.addListener(
             case 'popupShowAvailableFormats':
                 let suggested_format = message.data.suggested_format;
                 let available_formats = message.data.available_formats;
-                let video_publish_date = new Date(Date.parse(message.data.video_publish_date)); // chrome messages are JSON, any date is received as a String
-                // Assumes formats ordered from newest to oldest
-                let lastSetReleasedBeforeVideo = available_formats.findIndex(f => {
-                    let legalSets = f.info.sets;
-                    let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
-                    let isSetReleasedBeforeVideo = new Date(Date.parse(lastSetReleasedAt)) < video_publish_date;
-                    return isSetReleasedBeforeVideo
+                let available_standards =
+                    available_formats
+                        .filter(f => f.value.startsWith("standard-"));
+                let available_formats_non_standard =
+                    available_formats
+                        .filter(f => ! f.value.startsWith("standard-"))
+                        .map(f => f.value);
+                let video_publish_date = parse_date(message.data.video_publish_date); // chrome messages are JSON, any date is received as a String
+                // Assumes standards sorted from most recent to oldest
+                let lastStandardReleasedBeforeVideo = available_standards.findIndex(f => {
+                    let isReleasedBeforeVideo = parse_date(f.info.released_at) < video_publish_date;
+                    return isReleasedBeforeVideo;
                 });
 
                 var any_standard_selected = false;
@@ -28,69 +41,60 @@ chrome.runtime.onMessage.addListener(
                 let HTML_string = '';
                 HTML_string += `<div>Please select the pool of cards to use; a smaller pool gives better results.</div>`;
                 HTML_string += `<div id="radios-div">`;
-                HTML_string += `    <div>`;
-                HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="standard" id="standard-radio">`;
-                // HTML_string += `            Standard:`;
-                HTML_string += `        </input>`;
-                HTML_string += `        </label>`;
-                HTML_string += `            <select id="standard-select">`;
-                HTML_string += `              <option value="default" disabled selected value>Standard</option>`;
-                for (let i = 0; i < available_formats.length; i++) {
-                    let selected_string = '';
-                    let asterisk_string = '';
-                    let legalSets = available_formats[i].info.sets;
-                    let formatName = available_formats[i].value;
-                    let firstSetName = legalSets[0].name;
-                    let lastSetName = legalSets[legalSets.length-1].name;
-                    let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
-                    let isSuggestedBasedOnVideoTitle = false;
-                    let isSuggestedBasedOnVideoPublishedDate = false;
-                    if (i === lastSetReleasedBeforeVideo) {
-                        isSuggestedBasedOnVideoPublishedDate = true;
-                        asterisk_string += '*';
+
+                // Standard formats
+                if (available_standards.length > 0) {
+                    HTML_string += `    <div>`;
+                    HTML_string += `        <label>`;
+                    HTML_string += `        <input type="radio" name="mtg_format" value="standard" id="standard-radio">`;
+                    // HTML_string += `            Standard:`;
+                    HTML_string += `        </input>`;
+                    HTML_string += `        </label>`;
+                    HTML_string += `            <select id="standard-select">`;
+                    HTML_string += `              <option value="default" disabled selected value>Standard</option>`;
+                    for (let i = 0; i < available_standards.length; i++) {
+                        let selected_string = '';
+                        let asterisk_string = '';
+                        let legalSets = available_standards[i].info.sets;
+                        let formatName = available_standards[i].value;
+                        let firstSetName = legalSets[0].name;
+                        let lastSetName = legalSets[legalSets.length-1].name;
+                        let lastSetReleasedAt = legalSets[legalSets.length-1].released_at;
+                        let isSuggestedBasedOnVideoTitle = false;
+                        let isSuggestedBasedOnVideoPublishedDate = false;
+                        if (i === lastStandardReleasedBeforeVideo) {
+                            isSuggestedBasedOnVideoPublishedDate = true;
+                            asterisk_string += '*';
+                        }
+                        if (suggested_format === available_standards[i].value) {
+                            any_standard_selected = true;
+                            selected_string = 'selected';
+                            isSuggestedBasedOnVideoTitle = true;
+                            asterisk_string += '*';
+                        }
+                        HTML_string += `<option value="${formatName}" ${selected_string}>Standard: ${asterisk_string}${lastSetName}${asterisk_string}`;
+                        if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
+                            let hints = [];
+                            if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
+                            if (isSuggestedBasedOnVideoPublishedDate) { hints.push('date'); }
+                            HTML_string += ` (based on the <br>video ${hints.join(' and ')})`;
+                        }
+                        HTML_string += `</option>`;
                     }
-                    if (suggested_format === available_formats[i].value) {
-                        any_standard_selected = true;
-                        selected_string = 'selected';
-                        isSuggestedBasedOnVideoTitle = true;
-                        asterisk_string += '*';
-                    }
-                    HTML_string += `<option value="${formatName}" ${selected_string}>Standard: ${asterisk_string}${lastSetName}${asterisk_string}`;
-                    if (isSuggestedBasedOnVideoTitle || isSuggestedBasedOnVideoPublishedDate) {
-                        let hints = [];
-                        if (isSuggestedBasedOnVideoTitle) { hints.push('title'); }
-                        if (isSuggestedBasedOnVideoPublishedDate) { hints.push('date'); }
-                        HTML_string += ` (based on the <br>video ${hints.join(' and ')})`;
-                    }
-                    HTML_string += `</option>`;
+                    HTML_string += `            </select>`;
+                    HTML_string += `    </div>`;
                 }
-                HTML_string += `            </select>`;
-                HTML_string += `    </div>`;
-                HTML_string += `    <div>`;
-                HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="pioneer" id="pioneer-radio"/>`;
-                HTML_string += `        Pioneer`;
-                HTML_string += `        </label>`;
-                HTML_string += `    </div>`;
-                HTML_string += `    <div>`;
-                HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="modern" id="modern-radio"/>`;
-                HTML_string += `        Modern`;
-                HTML_string += `        </label>`;
-                HTML_string += `    </div>`;
-                HTML_string += `    <div>`;
-                HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="vintage" id="vintage-radio"/>`;
-                HTML_string += `        Vintage`;
-                HTML_string += `        </label>`;
-                HTML_string += `    </div>`;
-                HTML_string += `    <div>`;
-                HTML_string += `        <label>`;
-                HTML_string += `        <input type="radio" name="mtg_format" value="commander" id="commander-radio"/>`;
-                HTML_string += `        Commander`;
-                HTML_string += `        </label>`;
-                HTML_string += `    </div>`;
+
+                // non-Standard formats
+                for (let format of available_formats_non_standard) {
+                    HTML_string += `    <div>`;
+                    HTML_string += `        <label>`;
+                    HTML_string += `        <input type="radio" name="mtg_format" value="${format}" id="${format}-radio"/>`;
+                    HTML_string += `        ${capitalize(format)}`;
+                    HTML_string += `        </label>`;
+                    HTML_string += `    </div>`;
+                }
+
                 HTML_string += `</div>`;
                 HTML_string += `<div>`;
                 HTML_string += `<div id="selected-sets-label">Selected sets:</div>`;
@@ -119,14 +123,8 @@ chrome.runtime.onMessage.addListener(
                     })();
                 }
 
-                let standardRadio = document.getElementById('standard-radio');
                 let standardSelect = document.getElementById('standard-select');
-                let modernRadio = document.getElementById('modern-radio');
-                let pioneerRadio = document.getElementById('pioneer-radio');
-                let vintageRadio = document.getElementById('vintage-radio');
-                let commanderRadio = document.getElementById('commander-radio');
                 let myButton = document.getElementById('my-button');
-                let selectedSets = [];
 
                 let getSelectedPool = function() {
                     const checked_radio = document.querySelector('input[name=mtg_format]:checked');
@@ -159,21 +157,25 @@ chrome.runtime.onMessage.addListener(
                         }
                     }
                 }
-                standardRadio.onchange = radioChange;
-                modernRadio.onchange = radioChange;
-                pioneerRadio.onchange = radioChange;
-                vintageRadio.onchange = radioChange;
-                commanderRadio.onchange = radioChange;
 
-                standardSelect.onchange = function() {
-                    standardRadio.checked = true;
-                    radioChange();
-                }
-                standardRadio.onclick = function() {
-                    if (standardSelect.value === 'default') {
-                        return false;
+                if (available_standards.length > 0) {
+                    let standardRadio = document.getElementById('standard-radio');
+                    standardRadio.onchange = radioChange;
+                    standardSelect.onchange = function() {
+                        standardRadio.checked = true;
+                        radioChange();
+                    }
+                    standardRadio.onclick = function() {
+                        if (standardSelect.value === 'default') {
+                            return false;
+                        }
                     }
                 }
+
+                for (let format of available_formats_non_standard) {
+                    document.getElementById(`${format}-radio`).onchange = radioChange;
+                }
+
                 if (suggested_format) {
                     if (any_standard_selected) {
                         standardSelect.onchange();

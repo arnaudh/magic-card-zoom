@@ -53,7 +53,7 @@ See [this page](./doc/How_it_works.md) for an explanation of how it works.
 
 ## Contributing
 
-Please submit any feedback, issues, or feature requests you have [here](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link).
+Please submit any feedback, issues, or feature requests you have using [GitHub issues](/../../issues) or using [this quick feedback link](https://docs.google.com/forms/d/e/1FAIpQLSc74wD1PziO3uHVpGuEHrQj9vrd_EMKhSxVJhtaJDyT42ELTQ/viewform?usp=sf_link).
 
 Also, you are more than welcome to contribute directly to this repository!
 To do so, fork it, make some changes and submit a pull request.
@@ -97,10 +97,10 @@ yarn
 
 ### Download images
 
-> From here onwards, the images and indexes are downloaded & built for the pool of cards specified in [config.json](config.json) (under `availableStandards`).
-> To speed up these steps, e.g. for dev/testing purposes, you can edit that file to target only one Standard set of your choosing.
+> From here onwards, the cards used to build and run the extension are taken from the formats specified in [config.json](config.json), using the `allowedFormats` property.
+> If left empty, all sets found on Scryfall will be used. To speed up development and testing, it is recommended to limit to a single format, e.g. `allowedFormats: ["standard-kld"]`
 
-This downloads all images and necessary metadata from [Scryfall](http://scryfall.com) (takes about 30 minutes for all Standard sets).
+The following command downloads all images and necessary metadata from [Scryfall](http://scryfall.com) (can take around 4 hours for all sets, or 3 minutes for a single Standard).
 
 ```
 node src/js/util/download_all.js
@@ -110,10 +110,11 @@ This will create the `assets/` folder at the root of the repository.
 - `assets/images/` contains all the card images
 - `assets/metadata/` contains information about cards and sets
 
+The script can be interrupted, and when re-run it will continue to download images and metadata that it hasn't downloaded yet.
 
 ### Index images
 
-Indexing is the generation of feature descriptors for all card images in the pool of cards. The feature descriptors are the "card signatures" that are later used to match the video pixels to a specific card.
+Indexing is the generation of feature descriptors, i.e. the "card signatures" that are later used to match the video pixels to a specific card.
 Currently the feature descriptor used is [ORB](http://www.willowgarage.com/sites/default/files/orb_final.pdf), as provided by the [jsfeat](https://github.com/inspirit/jsfeat) library.
 
 ```
@@ -132,7 +133,7 @@ This will create the `build/` folder containing all code and assets required to 
 
 ### Load the extension
 
-In Chrome: Menu > More Tools > Extensions > Load unpacked > Select the `build/` folder
+In Chrome: Menu > More Tools > Extensions > Load unpacked > select the `build/` folder.
 
 The extension should now be loaded and ready to use.
 

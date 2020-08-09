@@ -1,6 +1,7 @@
 {
   "descriptorIndexName": "orb-maxkeypoints200-cardheight70",
   "identifyServiceName": "orb-maxkeypoints200-cardheight70_bruteforce-hamming_min3-max50-ratio0.82min3-affine1",
+  "allowedFormats": [],
   "includeBasicLands": false,
   "includeTokens": true,
   "includeDuplicateIllustrations": false,

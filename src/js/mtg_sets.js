@@ -26,10 +26,20 @@ let modernHorizonsSet = allSetsInfoDict['mh1'];
 let modernMastersSets = allSetsInfo.filter(info => info.set_type === "masters" && info.name.includes("Modern Masters"));
 let commanderSets = allSetsInfo.filter(info => info.set_type === "commander" && !info.name.includes("Tokens"));
 
+let allStandards = Object.keys(standardDict).map(x => `standard-${x}`).reverse();
+let allFormats = allStandards.concat('pioneer', 'modern', 'vintage', 'commander');
+
 let allAvailableSets = expandSets("all_sets");
+let allAvailableFormats = allFormats;
 
-let allAvailableStandards = Object.keys(standardDict).map(x => `standard-${x}`);
+if (config.allowedFormats.length > 0) {
+    let allowedSets = config.allowedFormats.map(format => expandSets(format)).flat()
+    allAvailableSets = allAvailableSets.filter(code => allowedSets.includes(code));
+    allAvailableFormats = allAvailableFormats.filter(s => config.allowedFormats.includes(s));
+}
 
+// Expand formats into their constituent sets
+// Note: expands regardless of config.allowedFormats
 function expandSets(mtg_sets_or_formats, includeTokens=config.includeTokens) {
     // console.log(`expandSets() includeTokens=${includeTokens}, mtg_sets_or_formats=`, mtg_sets_or_formats, );
     if (mtg_sets_or_formats == "all_sets") {
@@ -137,7 +147,7 @@ function inferMtgFormatFromText(text) {
 function findMtgStandardInText(text) {
     let textUpper = text.toUpperCase();
     for (const [code, set_info] of Object.entries(allSetsInfoDict)) {
-        if (allAvailableStandards.includes(`standard-${code}`)) {
+        if (allAvailableFormats.includes(`standard-${code}`)) {
             let mtgSetName = set_info.name.toUpperCase();
             if (textUpper.includes(mtgSetName)) {
                 return `standard-${code}`;
@@ -152,8 +162,10 @@ function getStandardInfo(standard) {
     let match = /^standard-(.+)$/.exec(standard);
     if (match) {
         let legalSets = getLegalSetsForStandard(match[1]);
+        let setsInfo = legalSets.map(code => allSetsInfoDict[code]);
         return {
-            'sets': legalSets.map(code => allSetsInfoDict[code])
+            'sets': setsInfo,
+            'released_at': setsInfo[setsInfo.length-1].released_at
         };
     } else {
         throw Error(`standard "${standard}" was not of the form "standard-xxx"`);
@@ -205,7 +217,7 @@ function filterOutDuplicateIllustrations(index) {
 
 module.exports.expandSets = expandSets;
 module.exports.allAvailableSets = allAvailableSets;
-module.exports.allAvailableStandards = allAvailableStandards;
+module.exports.allAvailableFormats = allAvailableFormats;
 module.exports.getMtgSetName = getMtgSetName;
 module.exports.getMtgSetIconUrl = getMtgSetIconUrl;
 module.exports.getStandardInfo = getStandardInfo;

@@ -101,14 +101,13 @@ chrome.runtime.onMessage.addListener(
       case 'okToShowAvailableFormats':
         getCurrentTab(function(currentTab) {
           console.log('currentTab', currentTab);
-          let availableFormats = mtg_sets.allAvailableStandards.map(standard => {
-            let standardInfo = mtg_sets.getStandardInfo(standard);
+          let availableFormats = mtg_sets.allAvailableFormats.map(format => {
+            let info = format.startsWith("standard-") ? mtg_sets.getStandardInfo(format) : null;
             return {
-              'value': standard,
-              'info': standardInfo
+              'value': format,
+              'info': info
             };
           })
-          availableFormats.reverse();
           let suggestedFormat = mtg_sets.inferMtgFormatFromText(currentTab.title);
           chrome.runtime.sendMessage({
             messageType: "popupShowAvailableFormats",
