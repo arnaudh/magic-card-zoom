@@ -155,21 +155,12 @@ The following steps need to be done whenever a new set is released.
 2. Edit download_standard_info.js to specify the latest set code:
 
 ```
-const latestMtgSet = 'thb';
+const latestMtgSet = 'znr';
 ```
 
-3. Edit standard.json to add the latest standard:
+3. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.) 
 
-```
-  "availableStandards": [
-    ...,
-    "standard-thb"
-  ],
-```
-
-4. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.) 
-
-5. Release the new version of the extension on the Webstore
+4. Release the new version of the extension on the Webstore
 
 ## Test
 

@@ -8,10 +8,11 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'iko';
+const latestMtgSet = 'znr';
 const ignoreUnrecognizedSetNames = [
     'exclusive cards',
-    'restricted'
+    'restricted',
+    'other Arena-only cards'
 ];
 
 function downloadStandardInfo() {

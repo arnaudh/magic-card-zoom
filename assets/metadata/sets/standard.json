@@ -94,5 +94,8 @@
     "m20": ["xln", "rix", "dom", "m19", "grn", "rna", "war", "m20"],
     "eld": ["grn", "rna", "war", "m20", "eld"],
     "thb": ["grn", "rna", "war", "m20", "eld", "thb"],
-    "iko": ["grn", "rna", "war", "m20", "eld", "thb", "iko"]
+    "iko": ["grn", "rna", "war", "m20", "eld", "thb", "iko"],
+    "m21": ["grn", "rna", "war", "m20", "eld", "thb", "iko", "m21"],
+    "anb": ["grn", "rna", "war", "m20", "eld", "thb", "iko", "m21", "anb"],
+    "znr": ["eld", "thb", "iko", "m21", "znr"]
 }

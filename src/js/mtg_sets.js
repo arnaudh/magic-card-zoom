@@ -18,7 +18,7 @@ let coreExpansionSetsInfo = allSetsInfo.filter(function(info) {
         // work around Scryfall bug which refers to non-existent set (Jumpstart doesn't have tokens)
         return false;
     } else {
-        return ["core", "expansion"].includes(info.set_type);
+        return ["core", "expansion", "starter"].includes(info.set_type);
     }
 });
 
@@ -146,7 +146,9 @@ function inferMtgFormatFromText(text) {
 
 function findMtgStandardInText(text) {
     let textUpper = text.toUpperCase();
-    for (const [code, set_info] of Object.entries(allSetsInfoDict)) {
+    // Sort by name length descending so that we try to find e.g. "Zendikar Rising" before "Zendikar"
+    let setsSortedByNameLengthDesc = Object.entries(allSetsInfoDict).sort((a, b) => b[1].name.length - a[1].name.length);
+    for (const [code, set_info] of setsSortedByNameLengthDesc) {
         if (allAvailableFormats.includes(`standard-${code}`)) {
             let mtgSetName = set_info.name.toUpperCase();
             if (textUpper.includes(mtgSetName)) {

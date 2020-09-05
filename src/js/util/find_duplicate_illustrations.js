@@ -47,14 +47,15 @@ function getSidesIdAndIllustrationID(item) {
     let illustrationIDs;
     if (item.illustration_id) {
         illustrationIDs = [item.illustration_id];
-    } else {
-        if (!item.card_faces) {
-            console.log(`Skipping card without illustrationID: ${item.name}`);
-            return [];
-        }
+    } else if (item.card_faces) {
         illustrationIDs = item.card_faces.map(face => face.illustration_id).filter(x => x !== undefined);
     }
-    assert(illustrationIDs.length == 1 || illustrationIDs.length == 2);
+
+    if (illustrationIDs === undefined || illustrationIDs.length === 0) {
+        console.log(`[find_duplicate_illustrations] Skipping card without illustrationID: ${item.name}`);
+        return [];
+    }
+
     let sides = [];
     for (var i = 0; i < illustrationIDs.length; i++) {   
         let sideId = item.collector_number;
