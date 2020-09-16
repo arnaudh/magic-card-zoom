@@ -146,8 +146,6 @@ After making changes to the code, re-build and then click the refresh button on 
 
 ## Adding a new _Magic: the Gathering™_ set
 
-> Note: this section is out of date
-
 The following steps need to be done whenever a new set is released.
 
 1. Check if there is a new set available on Scryfall: https://scryfall.com/sets
