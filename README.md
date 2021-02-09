@@ -12,6 +12,11 @@ The extension can be installed directly from the [Chrome Web Store](https://chro
 Chrome extension to identify Magic: The Gathering™ cards in videos and streams. Simply hover your mouse over any card to get a high definition visual.
 
 === Updates ===
+[2020-02-09] Version 3.1.3
+- Add Kaldheim set
+[2020-09-05] Version 3.1.2
+- Add Zendikar Rising set
+- starter sets are now included (e.g. Arena Beginner Set)
 [2020-08-09] Version 3.1.1
 - Use simpler Scryfall API to render cards
 - Add Core Set 2021 set
@@ -159,6 +164,12 @@ const latestMtgSet = 'znr';
 3. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.) 
 
 4. Release the new version of the extension on the Webstore
+
+```
+make package
+```
+
+Then manually upload the zip file to the [Chrome Dev Console](https://chrome.google.com/u/2/webstore/devconsole).
 
 ## Test
 
