@@ -8,11 +8,12 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'znr';
+const latestMtgSet = 'khm';
 const ignoreUnrecognizedSetNames = [
     'exclusive cards',
     'restricted',
-    'other Arena-only cards'
+    'other Arena-only cards',
+    '+WelcomeDeck2017'
 ];
 
 function downloadStandardInfo() {
@@ -64,7 +65,7 @@ function downloadStandardInfo() {
 
                     let lastMtgSet = mtgSetsList[mtgSetsList.length - 1];
 
-                    if (mtgStandardDict[lastMtgSet] && !arraysEqual(mtgStandardDict[lastMtgSet], mtgSetsList) && !['fem', 'mir', 'eld'].includes(lastMtgSet)) {
+                    if (mtgStandardDict[lastMtgSet] && !arraysEqual(mtgStandardDict[lastMtgSet], mtgSetsList) && !['fem', 'mir', 'eld', 'znr'].includes(lastMtgSet)) {
                         throw Error(`Already have entry for ${lastMtgSet}: ${mtgStandardDict[lastMtgSet]}`);
                     }
 
