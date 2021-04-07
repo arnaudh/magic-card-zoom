@@ -8,7 +8,7 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'khm';
+const latestMtgSet = 'stx';
 const ignoreUnrecognizedSetNames = [
     'exclusive cards',
     'restricted',
@@ -66,7 +66,7 @@ function downloadStandardInfo() {
                     let lastMtgSet = mtgSetsList[mtgSetsList.length - 1];
 
                     if (mtgStandardDict[lastMtgSet] && !arraysEqual(mtgStandardDict[lastMtgSet], mtgSetsList) && !['fem', 'mir', 'eld', 'znr'].includes(lastMtgSet)) {
-                        throw Error(`Already have entry for ${lastMtgSet}: ${mtgStandardDict[lastMtgSet]}`);
+                        throw Error(`Trying to add format ${mtgSetsList}. However we already have entry for ${lastMtgSet}: ${mtgStandardDict[lastMtgSet]}. Consider adding an exclusion in the code.`);
                     }
 
                     mtgStandardDict[lastMtgSet] = mtgSetsList;
@@ -106,7 +106,8 @@ let alternativeNames = {
     '9TH EDITION': 'NINTH EDITION',
     '10TH EDITION': 'TENTH EDITION',
     'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED',
-    'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS'
+    'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS',
+    'STRIXHAVEN': 'STRIXHAVEN: SCHOOL OF MAGES'
 }
 
 function mtgSetNameToCode(name) {

@@ -81,8 +81,8 @@
       "ori",
       "bfz",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "aer",
@@ -108,7 +108,8 @@
       "ajmp",
       "anb",
       "znr",
-      "khm"
+      "khm",
+      "stx"
     ],
     "true": [
       "8ed",
@@ -207,8 +208,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -249,15 +250,17 @@
       "tthb",
       "iko",
       "tiko",
-      "tm21",
       "m21",
+      "tm21",
       "ajmp",
       "anb",
       "znr",
       "sznr",
       "tznr",
       "khm",
-      "tkhm"
+      "tkhm",
+      "stx",
+      "tstx"
     ]
   },
   "vintage": {
@@ -279,8 +282,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -360,8 +363,8 @@
       "ori",
       "bfz",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "aer",
@@ -385,7 +388,8 @@
       "ajmp",
       "anb",
       "znr",
-      "khm"
+      "khm",
+      "stx"
     ],
     "true": [
       "lea",
@@ -405,8 +409,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -524,8 +528,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -562,15 +566,17 @@
       "tthb",
       "iko",
       "tiko",
-      "tm21",
       "m21",
+      "tm21",
       "ajmp",
       "anb",
       "znr",
       "sznr",
       "tznr",
       "khm",
-      "tkhm"
+      "tkhm",
+      "stx",
+      "tstx"
     ]
   },
   "commander": {
@@ -592,8 +598,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -678,8 +684,8 @@
       "bfz",
       "c15",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "c16",
@@ -712,7 +718,9 @@
       "znr",
       "znc",
       "khm",
-      "khc"
+      "khc",
+      "stx",
+      "c21"
     ],
     "true": [
       "lea",
@@ -732,8 +740,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -858,8 +866,8 @@
       "tc15",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -910,8 +918,8 @@
       "tc20",
       "iko",
       "tiko",
-      "tm21",
       "m21",
+      "tm21",
       "ajmp",
       "anb",
       "znr",
@@ -922,7 +930,10 @@
       "khm",
       "khc",
       "tkhc",
-      "tkhm"
+      "tkhm",
+      "stx",
+      "c21",
+      "tstx"
     ]
   },
   "all_sets": {
@@ -944,8 +955,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -1032,8 +1043,8 @@
       "bfz",
       "c15",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "c16",
@@ -1068,7 +1079,9 @@
       "znr",
       "znc",
       "khm",
-      "khc"
+      "khc",
+      "stx",
+      "c21"
     ],
     "true": [
       "lea",
@@ -1088,8 +1101,8 @@
       "itp",
       "vis",
       "5ed",
-      "por",
       "ppod",
+      "por",
       "wth",
       "tmp",
       "sth",
@@ -1218,8 +1231,8 @@
       "tc15",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -1274,8 +1287,8 @@
       "tc20",
       "iko",
       "tiko",
-      "tm21",
       "m21",
+      "tm21",
       "ajmp",
       "anb",
       "znr",
@@ -1286,7 +1299,10 @@
       "khm",
       "khc",
       "tkhc",
-      "tkhm"
+      "tkhm",
+      "stx",
+      "c21",
+      "tstx"
     ]
   }
 }

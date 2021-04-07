@@ -161,13 +161,37 @@ The following steps need to be done whenever a new set is released.
 const latestMtgSet = 'znr';
 ```
 
-3. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.) 
+3. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.)
 
-4. Release the new version of the extension on the Webstore
+There may be some errors here that need to be dealt with manually. For example the parsing of the Standard formats from Wikipedia is prone to issues, so special cases may need to be added in `download_standard_info.js`.
+
+Check that the `build/` folder loads and runs as expected.
+
+4. Regenerate test files
+
+First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`, then revert to `let regenerate = true`.
+
+Then commit the changes:
+
+```
+git commit -am "Add <name_of_the_set> set"
+```
+
+5. Bump the version
+
+Bump the patch version in `src/manifest.json` and commit the changes:
+
+```
+git commit -am "Set version to <X.X.X>"
+``` 
+
+5. Release the new version of the extension on the Webstore
 
 ```
 make package
 ```
+
+Confirm the zip file loads and runs as expected.
 
 Then manually upload the zip file to the [Chrome Dev Console](https://chrome.google.com/u/2/webstore/devconsole).
 

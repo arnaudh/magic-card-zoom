@@ -98,5 +98,6 @@
     "m21": ["grn", "rna", "war", "m20", "eld", "thb", "iko", "m21"],
     "anb": ["grn", "rna", "war", "m20", "eld", "thb", "iko", "m21", "anb"],
     "znr": ["eld", "thb", "iko", "m21", "znr"],
-    "khm": ["eld", "thb", "iko", "m21", "znr", "khm"]
+    "khm": ["eld", "thb", "iko", "m21", "znr", "khm"],
+    "stx": ["eld", "thb", "iko", "m21", "znr", "khm", "stx"]
 }
