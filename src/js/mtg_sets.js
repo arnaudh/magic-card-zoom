@@ -144,6 +144,10 @@ function inferMtgFormatFromText(text) {
     }     
 }
 
+let alternativeNames = {
+    'STRIXHAVEN: SCHOOL OF MAGES': ['STRIXHAVEN']
+}
+
 function findMtgStandardInText(text) {
     let textUpper = text.toUpperCase();
     // Sort by name length descending so that we try to find e.g. "Zendikar Rising" before "Zendikar"
@@ -151,7 +155,8 @@ function findMtgStandardInText(text) {
     for (const [code, set_info] of setsSortedByNameLengthDesc) {
         if (allAvailableFormats.includes(`standard-${code}`)) {
             let mtgSetName = set_info.name.toUpperCase();
-            if (textUpper.includes(mtgSetName)) {
+            let validNamesForSet = alternativeNames[mtgSetName] ? alternativeNames[mtgSetName].concat(mtgSetName) : [mtgSetName];
+            if (validNamesForSet.some(alt => textUpper.includes(alt))) {
                 return `standard-${code}`;
             }
         }

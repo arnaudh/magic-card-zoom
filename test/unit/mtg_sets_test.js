@@ -66,5 +66,12 @@ describe('mtg_sets', () => {
             );
             done();
         })
+        it('should work with alternate names', (done) => {
+            assert.equal(
+                mtg_sets.inferMtgFormatFromText('Strixhaven - Draft MTG | Reid Duke'),
+                "standard-stx" // "Strixhaven" is the short name for "Strixhaven: School of Mages"
+            );
+            done();
+        })
     })     
 });
