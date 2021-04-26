@@ -7,8 +7,6 @@ const config = require('../../../config.json');
 
 let channelUrlRegex = /.*youtube\.com\/channel\/([a-zA-Z0-9_-]+)/;
 
-let theVideo;
-let theVideoSource;
 let theCanvas;
 let mousePos;
 let currentRectangle;
@@ -16,8 +14,7 @@ let popup;
 let popupImage;
 let loadingPopup;
 let loadingPopupImage;
-let parentOfPopup;
-let body;
+let parentOfPopup = document.body;
 
 let mousePosition = null;
 let lastMouseLoopPosition = null;
@@ -43,15 +40,12 @@ let lastMessageSent = null;
 let checkMouseLoopInterval;
 let readyStateCheckInterval = setInterval(function() {
   console.log('[MCZ main.js] Checking if there is a video...');
-  body = document.getElementsByTagName('body')[0];
   let videos = document.getElementsByTagName('video');
   if (videos.length > 0) {
+    console.log(`[MCZ main.js] Found ${videos.length} video(s)`);
     clearInterval(readyStateCheckInterval);
 
     channelID = getChannelId();
-
-    theVideo = videos[0];
-    console.log("A WILD VIDEO APPEARED", theVideo);
     
     popupImage = document.createElement('img');
     popup = document.createElement('div');
@@ -64,12 +58,8 @@ let readyStateCheckInterval = setInterval(function() {
     loadingPopup.className = "loading-popup";
     loadingPopup.appendChild(loadingPopupImage);
 
-    parentOfPopup = body;
     parentOfPopup.appendChild(popup);
     parentOfPopup.appendChild(loadingPopup);
-
-    // // Set video cursor
-    // theVideo.style.cursor = `url('${chrome.extension.getURL("24_bg.gif")}'), auto`;
 
     document.addEventListener('mousemove', mymousemove, false);
 
@@ -121,10 +111,10 @@ function movePopupAndLoadingIfNecessary() {
     document.fullscreenElement.appendChild(loadingPopup);
   }
   // if not in fullscreen, make sure popup is under the body
-  if (!document.fullscreenElement && popup.parentElement != body) {
+  if (!document.fullscreenElement && popup.parentElement != document.body) {
     console.log('moving popup & loading under body');
-    body.appendChild(popup);
-    body.appendChild(loadingPopup);
+    document.body.appendChild(popup);
+    document.body.appendChild(loadingPopup);
   }
 }
 
@@ -157,36 +147,36 @@ function checkMouseLoop() {
   movePopupAndLoadingIfNecessary();
   if (
     mousePosition == lastMouseLoopPosition
-    && +new Date() > +lastMove + MOUSE_STOP_AND_IDENTIFY_DELAY
-    && mouseOverVideo(mousePosition)
     && !mouse_stopped_to_identify
+    && +new Date() > +lastMove + MOUSE_STOP_AND_IDENTIFY_DELAY
   ) {
-    lastMouseStopToIdentifyPosition = mousePosition;
-    // from there on, we shouldn't ask to identify unless we move again
-    mouse_stopped_to_identify = true;
-    let timer = new Timer();
+    let hoveredVideo = getHoveredVideo(mousePosition);
+    if (hoveredVideo) {
+      lastMouseStopToIdentifyPosition = mousePosition;
+      // from there on, we shouldn't ask to identify unless we move again
+      mouse_stopped_to_identify = true;
+      let timer = new Timer();
 
+      let data = {
+        mousePosition: mousePosition,
+        videoBoundingRect: hoveredVideo.getBoundingClientRect(),
+        devicePixelRatio: window.devicePixelRatio,
+        page: {
+          title: document.title,
+          channelID: channelID
+        },
+        timer: timer
+      };
+      sendChromeMessage('mouseMovedOverVideo', data, handleResponseFromBackground);
+      showLoadingGif();
+    }
+  }
 
-
-    let data = {
-      mousePosition: mousePosition,
-      videoBoundingRect: theVideo.getBoundingClientRect(),
-      devicePixelRatio: window.devicePixelRatio,
-      page: {
-        title: document.title,
-        channelID: channelID
-      },
-      timer: timer
-    };
-    sendChromeMessage('mouseMovedOverVideo', data, handleResponseFromBackground);
-    showLoadingGif();
-  } else {
-    if (lastMouseStopToIdentifyPosition && distance(mousePosition, lastMouseStopToIdentifyPosition) > MOVE_DISTANCE_TO_CANCEL_IDENTIFICATION) {
-      // just so we don't spam with cancelIdentify messages
-      if (lastMessageSent && lastMessageSent.messageType != 'cancelIdentify') {
-        sendChromeMessage('cancelIdentify');
-        hidePopupAndLoadingGif();
-      }
+  if (lastMouseStopToIdentifyPosition && distance(mousePosition, lastMouseStopToIdentifyPosition) > MOVE_DISTANCE_TO_CANCEL_IDENTIFICATION) {
+    // just so we don't spam with cancelIdentify messages
+    if (lastMessageSent && lastMessageSent.messageType != 'cancelIdentify') {
+      sendChromeMessage('cancelIdentify');
+      hidePopupAndLoadingGif();
     }
   }
   lastMouseLoopPosition = mousePosition;
@@ -293,11 +283,21 @@ function bounded(x, min, max) {
   return Math.min(Math.max(min, x), max);
 }
 
-function mouseOverVideo(m) {
+function getHoveredVideo(mousePosition) {
+  let videos = document.getElementsByTagName('video');
+  for (let video of videos) {
+    if (mouseOverVideo(mousePosition, video)) {
+      return video;
+    }
+  }
+  return null;
+}
+
+function mouseOverVideo(m, video) {
   if (m === null) {
     return false;
   }
-  const r = theVideo.getBoundingClientRect();
+  const r = video.getBoundingClientRect();
   const res =
     r.left < m.clientX && m.clientX < r.right &&
     r.top < m.clientY && m.clientY < r.bottom;
