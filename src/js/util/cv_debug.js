@@ -89,7 +89,7 @@ class CvDebug {
 
     crop(img, x, y, width, height) {
         // console.log('img', img);
-        console.log(`cropping image [${img.cols}, ${img.rows}] with region [${x}, ${y}, ${width}, ${height}]`);
+        // console.log(`cropping image [${img.cols}, ${img.rows}] with region [${x}, ${y}, ${width}, ${height}]`);
         if (
             x < 0 || x >= img.cols ||
             y < 0 || y >= img.rows ||

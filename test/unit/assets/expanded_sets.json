@@ -70,8 +70,8 @@
       "ths",
       "bng",
       "jou",
-      "m15",
       "cp1",
+      "m15",
       "ktk",
       "cp2",
       "frf",
@@ -81,8 +81,8 @@
       "ori",
       "bfz",
       "ogw",
-      "w16",
       "soi",
+      "w16",
       "emn",
       "kld",
       "aer",
@@ -109,7 +109,8 @@
       "anb",
       "znr",
       "khm",
-      "stx"
+      "stx",
+      "afr"
     ],
     "true": [
       "8ed",
@@ -189,8 +190,8 @@
       "jou",
       "tjou",
       "tdag",
-      "m15",
       "cp1",
+      "m15",
       "tm15",
       "ktk",
       "tktk",
@@ -208,8 +209,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "w16",
       "soi",
+      "w16",
       "tsoi",
       "emn",
       "temn",
@@ -260,7 +261,9 @@
       "khm",
       "tkhm",
       "stx",
-      "tstx"
+      "tstx",
+      "afr",
+      "tafr"
     ]
   },
   "vintage": {
@@ -353,8 +356,8 @@
       "ths",
       "bng",
       "jou",
-      "m15",
       "cp1",
+      "m15",
       "ktk",
       "cp2",
       "frf",
@@ -363,8 +366,8 @@
       "ori",
       "bfz",
       "ogw",
-      "w16",
       "soi",
+      "w16",
       "emn",
       "kld",
       "aer",
@@ -389,7 +392,8 @@
       "anb",
       "znr",
       "khm",
-      "stx"
+      "stx",
+      "afr"
     ],
     "true": [
       "lea",
@@ -511,8 +515,8 @@
       "jou",
       "tjou",
       "tdag",
-      "m15",
       "cp1",
+      "m15",
       "tm15",
       "ktk",
       "tktk",
@@ -528,8 +532,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "w16",
       "soi",
+      "w16",
       "tsoi",
       "emn",
       "temn",
@@ -576,7 +580,9 @@
       "khm",
       "tkhm",
       "stx",
-      "tstx"
+      "tstx",
+      "afr",
+      "tafr"
     ]
   },
   "commander": {
@@ -672,8 +678,8 @@
       "c13",
       "bng",
       "jou",
-      "m15",
       "cp1",
+      "m15",
       "ktk",
       "c14",
       "cp2",
@@ -684,8 +690,8 @@
       "bfz",
       "c15",
       "ogw",
-      "w16",
       "soi",
+      "w16",
       "emn",
       "kld",
       "c16",
@@ -720,7 +726,9 @@
       "khm",
       "khc",
       "stx",
-      "c21"
+      "c21",
+      "afr",
+      "afc"
     ],
     "true": [
       "lea",
@@ -845,8 +853,8 @@
       "jou",
       "tjou",
       "tdag",
-      "m15",
       "cp1",
+      "m15",
       "tm15",
       "ktk",
       "tktk",
@@ -866,8 +874,8 @@
       "tc15",
       "ogw",
       "togw",
-      "w16",
       "soi",
+      "w16",
       "tsoi",
       "emn",
       "temn",
@@ -933,7 +941,11 @@
       "tkhm",
       "stx",
       "c21",
-      "tstx"
+      "tstx",
+      "tc21",
+      "afr",
+      "afc",
+      "tafr"
     ]
   },
   "all_sets": {
@@ -1030,8 +1042,8 @@
       "c13",
       "bng",
       "jou",
-      "m15",
       "cp1",
+      "m15",
       "ktk",
       "c14",
       "cp2",
@@ -1043,8 +1055,8 @@
       "bfz",
       "c15",
       "ogw",
-      "w16",
       "soi",
+      "w16",
       "emn",
       "kld",
       "c16",
@@ -1081,7 +1093,9 @@
       "khm",
       "khc",
       "stx",
-      "c21"
+      "c21",
+      "afr",
+      "afc"
     ],
     "true": [
       "lea",
@@ -1208,8 +1222,8 @@
       "jou",
       "tjou",
       "tdag",
-      "m15",
       "cp1",
+      "m15",
       "tm15",
       "ktk",
       "tktk",
@@ -1231,8 +1245,8 @@
       "tc15",
       "ogw",
       "togw",
-      "w16",
       "soi",
+      "w16",
       "tsoi",
       "emn",
       "temn",
@@ -1302,7 +1316,11 @@
       "tkhm",
       "stx",
       "c21",
-      "tstx"
+      "tstx",
+      "tc21",
+      "afr",
+      "afc",
+      "tafr"
     ]
   }
 }

@@ -169,7 +169,7 @@ Check that the `build/` folder loads and runs as expected.
 
 4. Regenerate test files
 
-First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`, then revert to `let regenerate = true`.
+First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`, then revert to `let regenerate = false`.
 
 Then commit the changes:
 

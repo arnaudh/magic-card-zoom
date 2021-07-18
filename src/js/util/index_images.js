@@ -64,7 +64,7 @@ async function indexImages(mtgSet) {
 }
 
 async function readAndDescribe(file, card_id) {
-    console.log('file', file);
+    // console.log('file', file);
     var originalImg = cvDebug.imread(file);
 
     if (descriptor.cardHeight) {

@@ -8,13 +8,28 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'stx';
+const latestMtgSet = 'afr';
 const ignoreUnrecognizedSetNames = [
     'exclusive cards',
     'restricted',
     'other Arena-only cards',
     '+WelcomeDeck2017'
 ];
+
+// to translate from wikipedia to scryfall
+let alternativeNames = {
+    '4TH EDITION': 'FOURTH EDITION',
+    '5TH EDITION': 'FIFTH EDITION',
+    '6TH EDITION': 'CLASSIC SIXTH EDITION',
+    '7TH EDITION': 'SEVENTH EDITION',
+    '8TH EDITION': 'EIGHTH EDITION',
+    '9TH EDITION': 'NINTH EDITION',
+    '10TH EDITION': 'TENTH EDITION',
+    'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED',
+    'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS',
+    'STRIXHAVEN': 'STRIXHAVEN: SCHOOL OF MAGES',
+    'D&AMP;D FORGOTTEN REALMS': 'ADVENTURES IN THE FORGOTTEN REALMS'
+}
 
 function downloadStandardInfo() {
     console.log('################################################');
@@ -96,19 +111,6 @@ function downloadStandardInfo() {
         });
 }
 
-// to translate from wikipedia to scryfall
-let alternativeNames = {
-    '4TH EDITION': 'FOURTH EDITION',
-    '5TH EDITION': 'FIFTH EDITION',
-    '6TH EDITION': 'CLASSIC SIXTH EDITION',
-    '7TH EDITION': 'SEVENTH EDITION',
-    '8TH EDITION': 'EIGHTH EDITION',
-    '9TH EDITION': 'NINTH EDITION',
-    '10TH EDITION': 'TENTH EDITION',
-    'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED',
-    'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS',
-    'STRIXHAVEN': 'STRIXHAVEN: SCHOOL OF MAGES'
-}
 
 function mtgSetNameToCode(name) {
     let namesToMatch = [
