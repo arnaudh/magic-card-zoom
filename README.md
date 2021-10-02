@@ -143,7 +143,7 @@ This will create the `build/` folder containing all code and assets required to 
 
 ### Load the extension
 
-In Chrome: Menu > More Tools > Extensions > Load unpacked > select the `build/` folder.
+In Chrome: Menu (⋮) > More Tools > Extensions > Load unpacked > select the `build/` folder.
 
 The extension should now be loaded and ready to use.
 
@@ -165,11 +165,12 @@ const latestMtgSet = 'znr';
 
 There may be some errors here that need to be dealt with manually. For example the parsing of the Standard formats from Wikipedia is prone to issues, so special cases may need to be added in `download_standard_info.js`.
 
-Check that the `build/` folder loads and runs as expected.
+Check that the `build/` folder loads and the extension works as expected on the new set(s).
 
 4. Regenerate test files
 
-First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`, then revert to `let regenerate = false`.
+First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`.
+Check that the changes in `test/unit/assets/expanded_sets.json` make sense (should just add the new sets), then revert to `let regenerate = false`.
 
 Then commit the changes:
 
