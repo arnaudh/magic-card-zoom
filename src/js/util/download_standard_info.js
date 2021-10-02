@@ -9,11 +9,12 @@ const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
 const latestMtgSet = 'afr';
+// These are used for substring matching, e.g. will ignore all sets containing the word "exclusive"
 const ignoreUnrecognizedSetNames = [
-    'exclusive cards',
+    'exclusive',
     'restricted',
     'other Arena-only cards',
-    '+WelcomeDeck2017'
+    '+WelcomeDeck2017',
 ];
 
 // to translate from wikipedia to scryfall
@@ -68,7 +69,7 @@ function downloadStandardInfo() {
                             let mtgSetCode = mtgSetNameToCode(sanitizedMtgSetName);
                             if (mtgSetCode) {
                                 mtgSetsList.push(mtgSetCode);
-                            } else if (ignoreUnrecognizedSetNames.includes(sanitizedMtgSetName)) {
+                            } else if (ignoreUnrecognizedSetNames.some(x => sanitizedMtgSetName.includes(x))) {
                                 console.log(`Warning: ignoring set name "${sanitizedMtgSetName}"`);
                             } else {
                                 haveErrors = true;
