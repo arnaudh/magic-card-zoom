@@ -8,7 +8,7 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'afr';
+const latestMtgSet = 'mid';
 // These are used for substring matching, e.g. will ignore all sets containing the word "exclusive"
 const ignoreUnrecognizedSetNames = [
     'exclusive',

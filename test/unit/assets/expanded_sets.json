@@ -81,8 +81,8 @@
       "ori",
       "bfz",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "aer",
@@ -110,7 +110,8 @@
       "znr",
       "khm",
       "stx",
-      "afr"
+      "afr",
+      "mid"
     ],
     "true": [
       "8ed",
@@ -209,8 +210,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -263,7 +264,10 @@
       "stx",
       "tstx",
       "afr",
-      "tafr"
+      "tafr",
+      "mid",
+      "smid",
+      "tmid"
     ]
   },
   "vintage": {
@@ -366,8 +370,8 @@
       "ori",
       "bfz",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "aer",
@@ -393,7 +397,8 @@
       "znr",
       "khm",
       "stx",
-      "afr"
+      "afr",
+      "mid"
     ],
     "true": [
       "lea",
@@ -532,8 +537,8 @@
       "tbfz",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -582,7 +587,10 @@
       "stx",
       "tstx",
       "afr",
-      "tafr"
+      "tafr",
+      "mid",
+      "smid",
+      "tmid"
     ]
   },
   "commander": {
@@ -690,8 +698,8 @@
       "bfz",
       "c15",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "c16",
@@ -728,7 +736,9 @@
       "stx",
       "c21",
       "afr",
-      "afc"
+      "afc",
+      "mid",
+      "mic"
     ],
     "true": [
       "lea",
@@ -874,8 +884,8 @@
       "tc15",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -945,7 +955,13 @@
       "tc21",
       "afr",
       "afc",
-      "tafr"
+      "tafc",
+      "tafr",
+      "mid",
+      "mic",
+      "smid",
+      "tmic",
+      "tmid"
     ]
   },
   "all_sets": {
@@ -1055,8 +1071,8 @@
       "bfz",
       "c15",
       "ogw",
-      "soi",
       "w16",
+      "soi",
       "emn",
       "kld",
       "c16",
@@ -1095,7 +1111,9 @@
       "stx",
       "c21",
       "afr",
-      "afc"
+      "afc",
+      "mid",
+      "mic"
     ],
     "true": [
       "lea",
@@ -1245,8 +1263,8 @@
       "tc15",
       "ogw",
       "togw",
-      "soi",
       "w16",
+      "soi",
       "tsoi",
       "emn",
       "temn",
@@ -1320,7 +1338,13 @@
       "tc21",
       "afr",
       "afc",
-      "tafr"
+      "tafc",
+      "tafr",
+      "mid",
+      "mic",
+      "smid",
+      "tmic",
+      "tmid"
     ]
   }
 }
