@@ -27,13 +27,15 @@ let descriptor = descriptors.fromName(descriptorName);
 cvDebug = new CvDebug(`assets/images/cards/${descriptor.name}`, false);
 
 if (typeof require != 'undefined' && require.main==module) {
-    console.log(`Running image indexer on ${expanded_mtg_sets}`);
-    for (var mtgSet of expanded_mtg_sets) {
-        indexImages(mtgSet);
-    }
+    require('../core/opencvjs_wrapper.js').initialize(function(cvwrapper){
+        console.log(`Running image indexer on ${expanded_mtg_sets}`);
+        for (var mtgSet of expanded_mtg_sets) {
+            indexImages(mtgSet, cvwrapper);
+        }
+    });
 }
 
-async function indexImages(mtgSet) {
+async function indexImages(mtgSet, cvwrapper) {
     let localDir = `assets/indexes/${descriptor.name}`;
     let localFilename = `${localDir}/${mtgSet}.json`;
     if (checkAlreadyCreated(localFilename)) {
@@ -51,7 +53,7 @@ async function indexImages(mtgSet) {
             var descriptionPromises = files.map(file => {
                 let [card_number, extension] = file.split('.');
                 let card_id = `${mtgSet}-${card_number}`;
-                return readAndDescribe(`assets/images/cards/small/${mtgSet}/${file}`, card_id);
+                return readAndDescribe(`assets/images/cards/small/${mtgSet}/${file}`, card_id, cvwrapper);
             });
             Promise.all(descriptionPromises)
             .then(results => {
@@ -63,9 +65,9 @@ async function indexImages(mtgSet) {
         });
 }
 
-async function readAndDescribe(file, card_id) {
+async function readAndDescribe(file, card_id, cvwrapper) {
     // console.log('file', file);
-    var originalImg = cvDebug.imread(file);
+    var originalImg = cvwrapper.imread(file);
 
     if (descriptor.cardHeight) {
         originalImg = cvDebug.resize(originalImg, [null, descriptor.cardHeight]);

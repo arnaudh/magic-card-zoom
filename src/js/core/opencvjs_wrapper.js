@@ -1,9 +1,34 @@
 const opencvjs = require("../lib/opencv.js");
+const fs = require('fs-extra');
+
+// Extract data with `sharp` (faster)
+// var get_image_data = require('get-image-data/native')
+const { createCanvas, loadImage } = require('canvas')
 
 class OpenCVJsWrapper {
     constructor(){
         if (!opencvjs) {
             throw 'opencvjs is not ready yet';
+        }
+    }
+
+    async imread(filename) {
+        let grayMat = new opencvjs.Mat();
+        // opencvjs.cvtColor(grayMat, grayMat, opencvjs.COLOR_RGBA2GRAY, 0);
+        // console.log('imread ', filename);
+        if (!fs.existsSync(filename)) {
+            throw `File not found: ${filename}`;
+        }
+        try {
+            // opencvjs cv.imread takes a canvas element or id, or img element or id. That
+            // doesn't work for us. We want to use cv.matFromImageData(imgData) (which is
+            // used by imread under the hood)
+            const myimg = await loadImage(filename);
+            // TODO: How to go from Image to imageData? The following throws an error.
+            return opencvjs.matFromImageData(myimg);
+            console.log('myimg', myimg);
+        } catch(error) {
+            throw Error(`Could not read ${filename}: ${error}`);
         }
     }
 
