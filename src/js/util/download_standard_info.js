@@ -8,7 +8,7 @@ const allSetsInfo = require("../../../assets/metadata/sets/sets.json");
 const WIKIPEDIA_STANDARD_URL = 'https://en.wikipedia.org/wiki/Timeline_of_Magic:_the_Gathering_Standard_(Type_II)';
 const LOCAL_FILE = 'assets/metadata/sets/standard.json';
 
-const latestMtgSet = 'mid';
+const latestMtgSet = 'snc';
 // These are used for substring matching, e.g. will ignore all sets containing the word "exclusive"
 const ignoreUnrecognizedSetNames = [
     'exclusive',
@@ -29,12 +29,16 @@ let alternativeNames = {
     'TIMESHIFTED': 'TIME SPIRAL TIMESHIFTED',
     'IKORIA: LAND OF BEHEMOTHS': 'IKORIA: LAIR OF BEHEMOTHS',
     'STRIXHAVEN': 'STRIXHAVEN: SCHOOL OF MAGES',
-    'D&AMP;D FORGOTTEN REALMS': 'ADVENTURES IN THE FORGOTTEN REALMS'
+    'D&AMP;D FORGOTTEN REALMS': 'ADVENTURES IN THE FORGOTTEN REALMS',
+    // Looks like new sets all have the name of the plane in it, but the Wikipedia page omits it
+    'MIDNIGHT HUNT': 'INNISTRAD: MIDNIGHT HUNT',
+    'CRIMSON VOW': 'INNISTRAD: CRIMSON VOW',
+    'NEON DYNASTY': 'KAMIGAWA: NEON DYNASTY',
 }
 
 function downloadStandardInfo() {
     console.log('################################################');
-    console.log('#   Downloading Standard info from Wikipedia   #');
+    console.log('#   Downloading Standard info from Wikipedia   #');
     console.log('################################################');
     console.log(`Calling ${WIKIPEDIA_STANDARD_URL}`);
     return requestPromise(WIKIPEDIA_STANDARD_URL)
@@ -65,7 +69,9 @@ function downloadStandardInfo() {
                         if (mtgSet && ! /^[-"&(]|Revised.*/.exec(mtgSet)) {
                             let sanitizedMtgSetName = mtgSet
                                 .replace(/\[.*\]/, '')
-                                .replace(/&apos;/, "'");
+                                .replace(/\(.*\)/, '')
+                                .replace(/&apos;/, "'")
+                                .trim();
                             let mtgSetCode = mtgSetNameToCode(sanitizedMtgSetName);
                             if (mtgSetCode) {
                                 mtgSetsList.push(mtgSetCode);

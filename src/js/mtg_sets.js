@@ -1,6 +1,12 @@
 const standardDict = require("../../assets/metadata/sets/standard.json");
 const config = require("../../config.json");
-const allSetsInfoUnsorted = require("../../assets/metadata/sets/sets.json");
+let allSetsInfoUnsorted = require("../../assets/metadata/sets/sets.json");
+
+// 2022-07-27: "The Brothers' War" (bro) is in the sets.json (from https://api.scryfall.com/sets)
+// but not showing up on https://scryfall.com/sets
+// and we get 404 when calling https://api.scryfall.com/cards/search?order=set&q=e:bro&unique=prints
+// TODO remove this exception when Scryfall have fully uploaded the set
+allSetsInfoUnsorted = allSetsInfoUnsorted.filter(item => item.code != "bro")
 
 // Sort by release date ascending
 const allSetsInfo = allSetsInfoUnsorted.sort((a, b) => new Date(a.released_at) - new Date(b.released_at));
