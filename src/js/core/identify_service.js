@@ -44,6 +44,7 @@ class IdentifyService {
             let newHeight = Math.round(scale * imageData.height);
             let imageDataResized = resizeImageData(imageData, newWidth, newHeight);
             if (cv_debug) {
+                throw `Can't cv_debug, sorry. Didn't port some functions when switching from opencv4nodejs to opencv.js, eg cv_debug.fromImageData and cv_debug.setDescriptorInputImg. Shouldn't be too hard if you need them though.`
                 cv_debug.setDescriptorInputImg(cv_debug.fromImageData(imageDataResized));
             }
 

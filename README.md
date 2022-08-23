@@ -88,7 +88,6 @@ The following instructions guide you through setting up, building and loading th
 Make sure you have the following installed:
 - [NodeJS](https://nodejs.org/)
 - [Yarn](https://yarnpkg.com/en/docs/install)
-- [CMake](https://cmake.org/download/)
 
 ### Clone the repository
 
@@ -98,8 +97,6 @@ cd magic-card-zoom/
 ```
 
 ### Install dependencies
-
-Takes about 20 min, due to opencv4nodejs being built.
 
 ```
 yarn
@@ -138,6 +135,8 @@ This will create the `assets/indexes/` folder containing the indexes of all imag
 ```
 node src/js/build/build.js
 ```
+
+Note: check there is no `WARNING - unable to locate ...`, as this means we'd miss out on some indexes.
 
 This will create the `build/` folder containing all code and assets required to load & run the extension in the browser.
 
@@ -222,7 +221,7 @@ The dataset and benchmark script can be found under [test/benchmark/](test/bench
 
 - [Scryfall](https://scryfall.com/): comprehensive search engine and API for _Magic: the Gathering™_ cards
 - [jsfeat](https://github.com/inspirit/jsfeat): JavaScript computer vision library
-- [OpenCV](https://github.com/opencv/opencv): open source computer vision library with C++, Python and Java interfaces
+- [OpenCV](https://github.com/opencv/opencv): open source computer vision library with C++, Python and Java interfaces (and [JavaScript binding](https://docs.opencv.org/3.4/d5/d10/tutorial_js_root.html))
 - [opencv4nodejs](https://github.com/justadudewhohacks/opencv4nodejs): OpenCV bindings for NodeJS
 - [emscripten](https://emscripten.org/): toolchain for compiling C/C++ to asm.js and WebAssembly
 - [ORB](http://www.willowgarage.com/sites/default/files/orb_final.pdf): fast rotation-invariant feature descriptor

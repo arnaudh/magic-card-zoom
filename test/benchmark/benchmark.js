@@ -162,6 +162,65 @@ function Timer() {
   this.reset();
 };
 
+async function run_training_item(item, identify_services, cvwrapper, benchmarkDir) {
+    let dir = item.trainingDir
+    let true_card_id = item.true_card_id;
+    let video_id = item.video_id;
+    let potentialCardHeights = [item.cardheight];
+    let mtg_format = item.mtg_format;
+    let test_item_name = path.basename(dir);
+    let debugOutputDir = `${benchmarkDir}/images/${test_item_name}/`;
+    let cvDebug = program.cvdebug ? new CvDebug(cvwrapper.cv, debugOutputDir, true) : null;
+    console.log(`*** ${item.trainingDir} [${item.true_card_id}] (${item.tags}) ***`);
+    
+    var originalImg = await new CvDebug(cvwrapper.cv).imread_async(`${dir}/input.png`);
+    var originalImageData = new CvDebug(cvwrapper.cv).toImageData(originalImg);
+
+    if (cvDebug) {
+        // save training image and info in benchmark dir
+        cvDebug.imwrite('input.png', originalImg);
+        copyFile(`${dir}/info.yml`, `${debugOutputDir}/info.yml`);
+
+        cvDebug.true_card_id = true_card_id;
+    }
+
+    let previousMatches = [];
+
+    const timer = new Timer();
+
+    // https://zellwk.com/blog/converting-callbacks-to-promises/
+    return new Promise((resolve, reject) => {
+        identify_services[mtg_format]
+            .identifyMultiScales(
+                originalImageData,
+                potentialCardHeights,
+                previousMatches,
+                function(result) {
+                    let card_identified;
+                    let time = timer.get();
+                    if (result) {
+                        let matches = result.matches;
+                        if (matches && matches[0] && matches[0].card_id) {
+                            card_identified = matches[0].card_id;
+                        } else {
+                            card_identified = null;
+                        }
+                    } else {
+                        card_identified = null;
+                    }
+                    let is_match = isMatch(card_identified, true_card_id);
+                    resolve({
+                        item: item,
+                        card_identified: card_identified,
+                        is_match: is_match,
+                        debugOutputDir: debugOutputDir,
+                        time: time
+                    });
+                },
+                cvDebug
+            );
+    });
+}
 
 function doTest(cvwrapper) {
     console.log('doTest');
@@ -185,99 +244,44 @@ function doTest(cvwrapper) {
     rimraf.sync(benchmarkDir);
     fs.mkdirsSync(benchmarkDir);
 
-    let results = [];
 
-    loopWithCallbak(
-        trainingItems.length,
-        function(i, next) {
-            let item = trainingItems[i];
+    // https://stackoverflow.com/questions/11488014/asynchronous-process-inside-a-javascript-for-loop
+    let promises = [];
+    for (const trainingItem of trainingItems) {
+        promises.push(run_training_item(trainingItem, identify_services, cvwrapper, benchmarkDir));
+    }
+    Promise.all(promises).then(results => {
+         // array of results in order here
+         // console.log(results);
+        let resultsFile = `${benchmarkDir}/results.txt`;
+        console.log(`\n*** ${resultsFile} ***`);
+        results.forEach(result => {
+            let tagString = result.item.tags ? result.item.tags.join(' ') : '';
+            let result_str = `${result.item.trainingDir} [${String(result.item.true_card_id).padStart(7)}] time ${String(result.time).padStart(4)} ms matched ${String(result.card_identified).padStart(7)} | ${result.is_match ? 1 : 0} (${tagString})`;
+            logAndAppendToFile(resultsFile, result_str);
+        });
 
-            let dir = item.trainingDir
-            let true_card_id = item.true_card_id;
-            let video_id = item.video_id;
-            let potentialCardHeights = [item.cardheight];
-            let mtg_format = item.mtg_format;
-            let test_item_name = path.basename(dir);
-            let debugOutputDir = `${benchmarkDir}/images/${test_item_name}/`;
-            let cvDebug = program.cvdebug ? new CvDebug(debugOutputDir, true) : null;
-            console.log(`*** ${item.trainingDir} [${item.true_card_id}] (${item.tags}) ***`);
-            
-            var originalImg = new CvDebug().imread(`${dir}/input.png`);
-            var originalImageData = new CvDebug().toImageData(originalImg);
+        let totalFile = `${benchmarkDir}/total.txt`;
+        console.log(`\n*** ${totalFile} ***`);
+        logAndAppendToFile(totalFile, `                      ┌─────┬─────────┬──────────┐`);
+        logAndAppendToFile(totalFile, `                      │  ✔  │   ✘ (!) │ accuracy │`);
+        logAndAppendToFile(totalFile, ' ┌────────────────────┼─────┼─────────┼──────────┤');
+        logBreakdown(totalFile, results, r => r.item.true_card_id !== null, 'Card in picture');
+        logBreakdown(totalFile, results, r => r.item.true_card_id === null, 'No card in picture');
+        logAndAppendToFile(totalFile, ' └────────────────────┼─────┼─────────┼──────────┤');
+        logBreakdown(totalFile, results, r => true, 'Total');
+        logAndAppendToFile(totalFile, '                      └─────┴─────────┴──────────┘');
 
-            if (cvDebug) {
-                // save training image and info in benchmark dir
-                cvDebug.imwrite('input.png', originalImg);
-                copyFile(`${dir}/info.yml`, `${debugOutputDir}/info.yml`);
-
-                cvDebug.true_card_id = true_card_id;
-            }
-
-            let previousMatches = [];
-
-            const timer = new Timer();
-
-
-            identify_services[mtg_format]
-                .identifyMultiScales(
-                    originalImageData,
-                    potentialCardHeights,
-                    previousMatches,
-                    function(result) {
-                        let card_identified;
-                        let time = timer.get();
-                        if (result) {
-                            let matches = result.matches;
-                            if (matches && matches[0] && matches[0].card_id) {
-                                card_identified = matches[0].card_id;
-                            } else {
-                                card_identified = null;
-                            }
-                        } else {
-                            card_identified = null;
-                        }
-                        let is_match = isMatch(card_identified, true_card_id);
-                        results.push({
-                            item: item,
-                            card_identified: card_identified,
-                            is_match: is_match,
-                            debugOutputDir: debugOutputDir,
-                            time: time
-                        });
-                        next();
-                    },
-                    cvDebug
-                );
-        },
-        function done() {
-            let resultsFile = `${benchmarkDir}/results.txt`;
-            console.log(`\n*** ${resultsFile} ***`);
-            results.forEach(result => {
-                let tagString = result.item.tags ? result.item.tags.join(' ') : '';
-                let result_str = `${result.item.trainingDir} [${String(result.item.true_card_id).padStart(7)}] time ${String(result.time).padStart(4)} ms matched ${String(result.card_identified).padStart(7)} | ${result.is_match ? 1 : 0} (${tagString})`;
-                logAndAppendToFile(resultsFile, result_str);
-            });
-
-            let totalFile = `${benchmarkDir}/total.txt`;
-            console.log(`\n*** ${totalFile} ***`);
-            logAndAppendToFile(totalFile, `                      ┌─────┬─────────┬──────────┐`);
-            logAndAppendToFile(totalFile, `                      │  ✔  │   ✘ (!) │ accuracy │`);
-            logAndAppendToFile(totalFile, ' ┌────────────────────┼─────┼─────────┼──────────┤');
-            logBreakdown(totalFile, results, r => r.item.true_card_id !== null, 'Card in picture');
-            logBreakdown(totalFile, results, r => r.item.true_card_id === null, 'No card in picture');
-            logAndAppendToFile(totalFile, ' └────────────────────┼─────┼─────────┼──────────┤');
-            logBreakdown(totalFile, results, r => true, 'Total');
-            logAndAppendToFile(totalFile, '                      └─────┴─────────┴──────────┘');
-
-            // TODO: histograms
-            // executeShell(
-            //     `cat ${benchmarkDir}/results.txt | perl -lne '/time +([0-9]+)/ and print $1' | histogram.py > ${benchmarkDir}/time_hist.txt`,
-            //     () => executeShell(
-            //         `tail -n +1 ${benchmarkDir}/results.txt ${benchmarkDir}/time_hist.txt ${benchmarkDir}/pos_hist.txt`,
-            //         () => {})
-            //     )
-        }
-    );
+        // TODO: histograms
+        // executeShell(
+        //     `cat ${benchmarkDir}/results.txt | perl -lne '/time +([0-9]+)/ and print $1' | histogram.py > ${benchmarkDir}/time_hist.txt`,
+        //     () => executeShell(
+        //         `tail -n +1 ${benchmarkDir}/results.txt ${benchmarkDir}/time_hist.txt ${benchmarkDir}/pos_hist.txt`,
+        //         () => {})
+        //     )
+     }).catch(err => {
+         throw err;
+     });
 }
 
 console.log('CALLING initialize from benchmark.js');

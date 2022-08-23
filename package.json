@@ -21,28 +21,21 @@
     "write-file-webpack-plugin": "3.4.2"
   },
   "dependencies": {
-    "canvas": "^2.0.1",
     "cheerio": "^1.0.0-rc.2",
+    "cli-progress": "^3.11.2",
     "commander": "^2.19.0",
     "density-clustering": "^1.3.0",
     "fetch-ponyfill": "^6.0.2",
     "file-saver": "^2.0.0",
-    "flamebearer": "^1.1.3",
     "fs": "^0.0.1-security",
-    "fs-monkey": "^0.3.3",
-    "get-image-data": "^3.0.1",
-    "get-pixels": "^3.3.2",
-    "loglevel": "^1.6.1",
+    "jimp": "^0.16.1",
     "mathjs": "^5.5.0",
-    "opencv4nodejs": "^4.9.0",
     "puppeteer": "^1.13.0",
     "read-yaml": "^1.1.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "resize-image-data": "^0.2.0",
     "rimraf": "^2.6.2",
-    "robust-point-in-polygon": "^1.0.3",
-    "tracking": "^1.1.3",
-    "ws": "^6.1.0"
+    "robust-point-in-polygon": "^1.0.3"
   }
 }

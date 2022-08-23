@@ -1,7 +1,8 @@
 const opencvjs = require("../lib/opencv.js");
 
 class OpenCVJsWrapper {
-    constructor(){
+    constructor(cv){
+        this.cv = cv;  // hack so we can pass this to CvDebug() constuctor in benchmark code. TODO merge opencvjs_wrapper and CvDebug.
         if (!opencvjs) {
             throw 'opencvjs is not ready yet';
         }
@@ -218,6 +219,7 @@ function cvMatToArray(mat) {
 
 // This is all quite a mess
 // How do we ensure all callbacks are called? (race condition)
+// Maybe check this instead https://docs.opencv.org/3.4/dc/de6/tutorial_js_nodejs.html
 let callbacks = [];
 let opencvjsWrapper;
 
@@ -239,7 +241,7 @@ let timer = new Timer();
 opencvjs['onRuntimeInitialized']=()=>{
     console.log('onRuntimeInitialized()');
     console.log(`opencv.js loaded in ${timer.get()} ms.`);
-    opencvjsWrapper = new OpenCVJsWrapper();
+    opencvjsWrapper = new OpenCVJsWrapper(opencvjs);
     console.log('CALLING CALLBACKS');
     callbacks.forEach(c => c(opencvjsWrapper));
     console.log('onRuntimeInitialized() DONE');

@@ -14,9 +14,10 @@ before(function(done) {
 
 describe('contour_finder', () => {
     describe('#getPotentialCardHeights', () => {
-            it(`should work`, (done) => {
-                let originalImg = new CvDebug().imread(`test/unit/assets/screenshot1.png`);
-                let originalImageData = new CvDebug().toImageData(originalImg);
+            it(`should work`, async function() {
+                let cv_debug = new CvDebug(contourFinder.cvwrapper.cv);
+                let originalImg = await cv_debug.imread_async(`test/unit/assets/screenshot1.png`);
+                let originalImageData = cv_debug.toImageData(originalImg);
                 let expectedSize = 66;
                 let maxPxDifference = 2;
 
@@ -24,7 +25,6 @@ describe('contour_finder', () => {
 
                 let foundExpectedSize = results.some(e => Math.abs(e-expectedSize) <= maxPxDifference);
                 assert.equal(foundExpectedSize, true, `Results ${results} did not contain ${expectedSize} ± ${maxPxDifference}`);
-                done();
             })
         })
 });
