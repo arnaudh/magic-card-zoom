@@ -154,46 +154,57 @@ The following steps need to be done whenever a new set is released.
 
 1. Check if there is a new set available on Scryfall: https://scryfall.com/sets
 
+    Make sure that latest set has all its cards available on scryfall.
+
 2. Edit download_standard_info.js to specify the latest set code:
 
-```
-const latestMtgSet = 'znr';
-```
+    ```
+    const latestMtgSet = 'znr';
+    ```
 
-3. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.)
+3. (Optional) delete existing metadata and index files
 
-There may be some errors here that need to be dealt with manually. For example the parsing of the Standard formats from Wikipedia is prone to issues, so special cases may need to be added in `download_standard_info.js`.
+    ```
+    trash ./assets/metadata/cards/full/ ./assets/indexes/orb-maxkeypoints200-cardheight70/
+    ```
 
-Check that the `build/` folder loads and the extension works as expected on the new set(s).
+    Doing this makes sure we download and index the latest list of cards for each set
+    (there may have been new images uploaded on older sets since the last run).
 
-4. Regenerate test files
+4. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.)
 
-First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`.
-Check that the changes in `test/unit/assets/expanded_sets.json` make sense (should just add the new sets), then revert to `let regenerate = false`.
+    There may be some errors here that need to be dealt with manually. For example the parsing of the Standard formats from Wikipedia is prone to issues, so special cases may need to be added in `download_standard_info.js`.
 
-Then commit the changes:
+    Check that the `build/` folder loads and the extension works as expected on the new set(s).
 
-```
-git commit -am "Add <name_of_the_set> set"
-```
+5. Regenerate test files
 
-5. Bump the version
+    First set `let regenerate = true` in `mtg_sets_test.js`, then re-run unit tests: `yarn test --recursive test/unit/`.
+    Check that the changes in `test/unit/assets/expanded_sets.json` make sense (should just add the new sets), then revert to `let regenerate = false`.
 
-Bump the patch version in `src/manifest.json` and commit the changes:
+    Then commit the changes:
 
-```
-git commit -am "Set version to <X.X.X>"
-``` 
+    ```
+    git commit -am "Add <name_of_the_set> set"
+    ```
 
-5. Release the new version of the extension on the Webstore
+6. Bump the version
 
-```
-make package
-```
+    Bump the patch version in `src/manifest.json` and commit the changes:
 
-Confirm the zip file loads and runs as expected.
+    ```
+    git commit -am "Set version to <X.X.X>"
+    ``` 
 
-Then manually upload the zip file to the [Chrome Dev Console](https://chrome.google.com/u/2/webstore/devconsole).
+7. Release the new version of the extension on the Webstore
+
+    ```
+    make package
+    ```
+
+    Confirm the zip file loads and runs as expected.
+
+    Then manually upload the zip file to the [Chrome Dev Console](https://chrome.google.com/u/2/webstore/devconsole).
 
 ## Test
 
