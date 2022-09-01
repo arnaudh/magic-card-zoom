@@ -253,6 +253,9 @@ function identifyCard(message, tab, sendResponse) {
   const cropLength = 200;
 
   lastVideoHeight = videoHeight;
+  // TODO captureVisibleTab might fail if exceeds quota / another call to it hasn't finished
+  // `Unchecked runtime.lastError: This request exceeds the MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota.`
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=1205278
   chrome.tabs.captureVisibleTab(
     tab.windowId,
     {format: "jpeg"},
