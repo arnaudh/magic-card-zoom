@@ -42,7 +42,7 @@ chrome.runtime.onInstalled.addListener(function() {
         })
       ],
       // ... show the page action. // could also change the icon
-      actions: [new chrome.declarativeContent.ShowPageAction() ]
+      actions: [new chrome.declarativeContent.ShowAction() ]
     }]);
   });
 });
