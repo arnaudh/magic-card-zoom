@@ -171,6 +171,13 @@ The following steps need to be done whenever a new set is released.
     Doing this makes sure we download and index the latest list of cards for each set
     (there may have been new images uploaded on older sets since the last run).
 
+    Can also see discrepancies between metadata and indexes:
+    ```
+    jq -r '.[] | {code,card_count} | join(" ")' assets/metadata/sets/sets.json | sort > metadata.csv
+    for set in assets/indexes/orb-maxkeypoints200-cardheight70/*; do indexed_cards=$(grep -o keypoints $set | wc -l | tr -d ' ') && echo $(basename $set .json) $indexed_cards; done | sort > indexes.csv
+    join indexes.csv metadata.csv | awk '$2<$3'
+    ```
+
 4. Re-run setup instructions starting from step 4 ([Download images](#download-images) etc.)
 
     There may be some errors here that need to be dealt with manually. For example the parsing of the Standard formats from Wikipedia is prone to issues, so special cases may need to be added in `download_standard_info.js`.
