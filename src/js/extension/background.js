@@ -22,6 +22,9 @@ const config = require('../../../config.json');
 
 import { saveAs } from 'file-saver';
 
+// TODO: plan for service worker being terminated. 
+// Likely can't store the IdentifySessions in local storage because there are limits (5MB storage, also quota limits).
+// Instead might just store the selectedPool per tab. And if mcz_active_tabs suddenly doesn't have our tab, recreate the identifySession from the stored selectedPool.
 let mcz_active_tabs = {};
 let LATEST_MESSAGE_ID = -1;
 
