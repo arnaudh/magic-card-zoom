@@ -22,10 +22,13 @@ const config = require('../../../config.json');
 
 import { saveAs } from 'file-saver';
 
-// TODO: plan for service worker being terminated. 
-// Likely can't store the IdentifySessions in local storage because there are limits (5MB storage, also quota limits).
-// Instead might just store the selectedPool per tab. And if mcz_active_tabs suddenly doesn't have our tab, recreate the identifySession from the stored selectedPool.
+// TODO: plan for service worker (SW) being terminated. 
+// Likely can't store the IdentifySessions in local storage because there are limits (5MB storage, also quota limits). Although there is a "unlimitedStorage" option for Web SQL Database and application cache https://developer.chrome.com/docs/extensions/mv3/declare_permissions/
+// Instead might just store the selectedPool per tab. And if mcz_active_tabs suddenly doesn't have our tab, recreate the identifySession from the stored selectedPool. First check how slow that is.
 // Note: can investigate / debug things in Chrome dev tools > Service Workers
+// Some tricks to make SW more persistent: https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/66618269#66618269
+// - measure time for each step in index_loader.load (fetch file, load, transform?)
+// - think if it makes sense to switch to Web SQL Database or application cache (is this already application cache?) for the use of service workers.
 let mcz_active_tabs = {};
 let LATEST_MESSAGE_ID = -1;
 
