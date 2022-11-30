@@ -92,7 +92,10 @@ chrome.runtime.onMessage.addListener(
             console.log('sending popupShowTurnOffButton');
             chrome.runtime.sendMessage({messageType: "popupShowTurnOffButton"});
           } else {
-            chrome.tabs.executeScript(currentTabId, {file: 'pre_main.bundle.js'});
+            chrome.scripting.executeScript({
+              target: {tabId: currentTabId},
+              files: ['pre_main.bundle.js'],
+            });
           }
         });
         break;
@@ -135,8 +138,9 @@ chrome.runtime.onMessage.addListener(
               mcz_active_tabs[currentTabId].identifySession = new IdentifySession(config.identifyServiceName, index, cvwrapper, true, loopAndCheckForCancellation);
               console.log(`mcz_active_tabs (set identifySession of ${currentTabId})`, Object.keys(mcz_active_tabs));
 
-              chrome.tabs.executeScript(currentTabId, {
-                file: 'main.bundle.js'
+              chrome.scripting.executeScript({
+                target: {tabId: currentTabId},
+                files: ['main.bundle.js']
               });
             });
         });
@@ -149,7 +153,7 @@ chrome.runtime.onMessage.addListener(
         break;
 
       case 'mainLoopActive':
-        chrome.pageAction.setIcon({tabId: sender.tab.id, path: 'icon128_recording.png'});
+        chrome.action.setIcon({tabId: sender.tab.id, path: 'icon128_recording.png'});
         break;
 
       case 'mouseMovedOverVideo':
@@ -212,7 +216,7 @@ function stopTabRecording(tabId) {
   chrome.tabs.sendMessage(tabId, {messageType: 'stopMainLoop'});
   delete mcz_active_tabs[tabId];
   console.log(`mcz_active_tabs (deleted ${tabId})`, Object.keys(mcz_active_tabs));
-  chrome.pageAction.setIcon({tabId: tabId, path: 'icon128.png'});
+  chrome.action.setIcon({tabId: tabId, path: 'icon128.png'});
 }
 
 function identifyCardHAHA(message, tab, sendResponse) {
