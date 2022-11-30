@@ -1,3 +1,33 @@
+
+# Manifest v3
+
+Chrome is [phasing out Manifest v2](https://developer.chrome.com/docs/extensions/mv3/mv2-sunset/):
+- June 2023: Chrome may run experiments to turn off support for Manifest V2 extensions
+- Jan 2024: removal of all Manifest V2 items
+
+[Manifest v3 migration guide](https://developer.chrome.com/docs/extensions/mv3/mv3-migration/)
+
+TODO
+- [x] Go through [checklist](https://developer.chrome.com/docs/extensions/mv3/mv3-migration-checklist/)
+    - DONE except service workers
+- [ ] Quick patch each issue below (eg remove affected code) until the extension loads ok, so we uncover all major issues
+- [ ] Replace background page with service workers (SW)
+    - SW are short lived. Probably need to re-work the index loading / session storage.
+    - index loading
+        - measure time for each step in index_loader.load (fetch file, load, etc.)
+        - consider if it makes sense to switch to Web SQL Database or application cache (are we alread using the application cache?)
+    - [Some tricks to make SW more persistent](https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension/66618269#66618269)
+- [ ] Handle code which uses `eval` or equivalent `new Function(...)`
+    - not allowed in v3 anymore, as deemed unsafe
+    - one solution seems to be sandboxing: [official link](https://developer.chrome.com/docs/extensions/mv3/sandboxingEval/), [unofficial blog post](https://medium.com/geekculture/how-to-use-eval-in-a-v3-chrome-extension-f21ca8c2160c)
+    - Code in MagicCardZoom affected:
+        - opencv.js: uses `new Function` a bunch of times, seemingly just to name anonymous functions?
+        - robust-point-in-polygon package, which uses robust-orientation ([known issue](https://github.com/mikolalysenko/robust-orientation/issues/4)). Alternative could be the point-in-polygon package?
+        - more?
+- [ ] wasm
+    - got the error "Refused to compile or instantiate WebAssembly module because neither 'wasm-eval' nor 'unsafe-eval' is an allowed"
+    - `wasm-unsafe-eval` should fix this?
+
 # ![Logo](src/img/icon30.svg) MagicCardZoom
 
 MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
