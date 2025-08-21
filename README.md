@@ -1,5 +1,10 @@
 # ![Logo](src/img/icon30.svg) MagicCardZoom
 
+
+
+> [!WARNING]
+> The extension doesn't work anymore (since Chrome stopped supporting Manifest v2 in 2024 https://github.com/arnaudh/magic-card-zoom/issues/25) and is now unmaintained. Feel free to fork and migrate to Manifest v3.
+
 MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
 
 Hover your mouse over any card, the extension will detect which card it is, and show that card in a high-definition overlay.
