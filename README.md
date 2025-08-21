@@ -2,7 +2,7 @@
 
 MagicCardZoom is a browser extension to identify _Magic: the Gathering™_ cards in videos and streams.
 
-Hover your mouse over any card, and the extension will detect which card it is, and show that card in a high-definition overlay.
+Hover your mouse over any card, the extension will detect which card it is, and show that card in a high-definition overlay.
 
 ![](src/img/capture1.gif)
 
