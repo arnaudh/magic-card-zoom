@@ -53,7 +53,7 @@ let readyStateCheckInterval = setInterval(function() {
     popup.appendChild(popupImage);
     
     loadingPopupImage = document.createElement('img');
-    loadingPopupImage.src = chrome.extension.getURL("loading.gif");
+    loadingPopupImage.src = chrome.runtime.getURL("loading.gif");
     loadingPopup = document.createElement('div');
     loadingPopup.className = "loading-popup";
     loadingPopup.appendChild(loadingPopupImage);
